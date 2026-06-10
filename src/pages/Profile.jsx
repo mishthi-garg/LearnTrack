@@ -24,7 +24,7 @@ function Profile(){
 
     return(
         <div>
-            <h1 className="text-2xl font-bold text-blue-600">Edit Profile</h1>
+            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Edit Profile</h1>
             <div className="flex flex-col gap-4 mt-6">
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Name:</label>
@@ -103,7 +103,7 @@ function Profile(){
                 <div className="flex justify-center">
                 <button 
                     onClick={addSubject}
-                    className="text-blue-900 hover:font-bold cursor-pointer">Click to add more subjects</button>
+                    className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">Click to add more subjects</button>
                 </div>
             </div>
             <button
@@ -113,7 +113,7 @@ function Profile(){
                     setEmail(newEmail);
                     setSubjects(newSubjects);
                 }}
-                className="bg-blue-600 font-bold text-white py-2 px-4 rounded-lg hover:bg-blue-700">SAVE</button>
+                className="bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">SAVE</button>
         </div>
     )
 }

@@ -40,7 +40,7 @@ function Dashboard() {
                     setHeatmapCounts ((prev)=>{
                         return {
                             ...prev,
-                            [today]: Math.max(0, (prev[today]+delta)),
+                            [today]: Math.max(0, ((prev[today]||0)+delta)),
                         }
                     })
 
@@ -68,11 +68,11 @@ function Dashboard() {
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold text-blue-600">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
             <div className="flex gap-6">
 
-                <div className="p-4 rounded-lg bg-orange-100 basis-1/3 max-h-64 overflow-y-auto">
-                    <h2 className="text-xl text-orange-500 font-bold">To-Do List</h2>
+                <div className="p-4 rounded-lg bg-[rgb(202,170,152,0.2)] basis-1/3 max-h-64 overflow-y-auto">
+                    <h2 className="text-xl text-[rgb(75,64,56)] font-bold">To-Do List</h2>
 
                     <div className="py-2 flex gap-3">
                         <input
@@ -84,7 +84,7 @@ function Dashboard() {
                         />
                         <button
                             onClick={addTask}
-                            className="min-w-0 bg-blue-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-700"
+                            className="min-w-0 bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                         >
                             Add
                         </button>
@@ -117,9 +117,9 @@ function Dashboard() {
                         )}
                     </div>
                 </div>
-                <div className="basis-2/3 bg-green-100 p-6 flex-1 overflow-x-auto rounded-lg">
+                <div className="basis-2/3 bg-[rgb(202,170,152,0.2)] p-6 flex-1 overflow-x-auto rounded-lg">
 
-                    <h2 className="text-xl text-green-500 font-bold">Activity</h2>
+                    <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Activity</h2>
                     <ActivityCalendar
                         data={buildActivityData()}
                         hideMonthLabels={false}
@@ -131,8 +131,8 @@ function Dashboard() {
                 </div>
 
             </div>
-            <div className="rounded-lg bg-purple-100 p-6 text-purple-500">
-                <h2 className="text-xl text-purple-500 font-bold">Events</h2>
+            <div className="rounded-lg bg-[rgba(202,170,152,0.2)] p-6 text-purple-500">
+                <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Events</h2>
                 <p className="p-4 text-gray-500">No upcoming events</p>
             </div>
 

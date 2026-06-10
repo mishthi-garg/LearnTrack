@@ -11,11 +11,11 @@ function App() {
   return (
     <BrowserRouter>
 
-      <div className="min-h-screen bg-yellow-50">
-        <div className="bg-white shadow-sm px-6 py-4 relative flex items-center justify-between">
+      <div className="min-h-screen bg-[rgb(234,224,207)]">
+        <div className="bg-[rgb(32,41,64)] shadow-sm px-6 py-4 relative flex items-center justify-between">
           <NavLink 
           to="/"
-          className="text-xl font-bold text-green-600">
+          className="text-xl font-bold text-[rgb(255,222,66)]">
             LearnTrack
           </NavLink>
          
@@ -23,7 +23,7 @@ function App() {
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600"
+                  isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
                 }
               >
                 Dashboard
@@ -32,7 +32,7 @@ function App() {
               <NavLink
                 to="/timetable"
                 className={({ isActive }) =>
-                  isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600"
+                  isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
                 }
               >
                 Timetable
@@ -41,7 +41,7 @@ function App() {
               <NavLink
                 to="/tutor"
                 className={({ isActive }) =>
-                  isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600"
+                  isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
                 }
               >
                 Tutor
@@ -50,7 +50,7 @@ function App() {
               <NavLink
                 to="/predict"
                 className={({ isActive }) =>
-                  isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600"
+                  isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
                 }
               >
                 Predict
@@ -66,14 +66,14 @@ function App() {
                 <NavLink
                   to="/profile"
                   className={({ isActive }) =>
-                    isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600"
+                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
                   }
                 >
                   PROFILE
                 </NavLink>
                 {
                   isHovered && (
-                    <div className="absolute flex flex-col gap-2 right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-lg py-2 px-6 min-w-max">
+                    <div className="absolute flex flex-col gap-2 right-0 top-8 bg-[rgb(238,238,238)] border border-[rgb(75,64,56)] rounded-xl shadow-lg py-2 px-6 min-w-max">
                       <p className="font-bold">Mishthi Garg</p>
                       <p>24UCC126</p>
                     </div>

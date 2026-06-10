@@ -30,7 +30,7 @@ function Timetable(){
 
     return(
         <div>
-            <h1 className="text-2xl font-bold text-blue-600">Timetable</h1>
+            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
             <div className="m-2 p-4 rounded-lg shadow border border-gray-200">
                 <FullCalendar
                     plugins={[timeGridPlugin, interactionPlugin]}
