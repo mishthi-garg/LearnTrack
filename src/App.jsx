@@ -151,7 +151,7 @@ function App() {
             <Route path="/predict" element={<ProtectedRoute user={user}><Predict /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute user={user}><Profile /></ProtectedRoute>} />
             <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />
-            <Route path="/tutor" element={<ProtectedRoute><Tutor /></ProtectedRoute>} />
+            <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor /></ProtectedRoute>} />
           </Routes>
         </div>
       </div>
