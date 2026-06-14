@@ -147,7 +147,7 @@ function App() {
           <Routes>
             <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
 
-            <Route path="/" element={<ProtectedRoute user={user}> <Dashboard /> </ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user}/> </ProtectedRoute>} />
             <Route path="/predict" element={<ProtectedRoute user={user}><Predict /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute user={user}><Profile /></ProtectedRoute>} />
             <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />

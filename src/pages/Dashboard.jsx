@@ -1,7 +1,8 @@
 import { ActivityCalendar } from "react-activity-calendar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
 
-function Dashboard() {
+function Dashboard({ user }) {
     const activityData1 = {
         "2026-01-05": 3,
         "2026-02-10": 1,
@@ -17,52 +18,85 @@ function Dashboard() {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const addTask = () => {
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchTasks = async () => {
+            const { data, error } = await supabase
+                .from("tasks")
+                .select("*")
+                .eq("user_id", user.id)
+                .order("created_at", { ascending: true });
+
+            if (error) console.error("Error fetching tasks:", error);
+            else setTasks(data);
+        };
+        fetchTasks();
+    }, [user]);
+
+
+    const addTask = async () => {
         if (taskInput.trim() === "") return;
 
         const newTask = {
-            id: Date.now(),
+            user_id: user.id,
             text: taskInput,
-            completed: false,
+            is_done: false,
         };
 
-        setTasks([...tasks, newTask]);
+        const { data, error } = await supabase
+            .from("tasks")
+            .insert(newTask)
+            .select()
+            .single();
+
+        if (error) console.error("Error adding task:", error);
+        else setTasks([...tasks, data]);
+
         setTaskInput("");
     };
 
-    const toggleTask = (id) => {
-        setTasks(
-            tasks.map((task) => {
-                if (task.id === id) {
+    const toggleTask = async (id) => {
+        const task = tasks.find((t) => t.id === id);
+        const newDone = !task.is_done;
 
-                    const delta = task.completed ? -1 : 1;
+        const { error } = await supabase
+            .from("tasks")
+            .update({ is_done: newDone })
+            .eq("id", id)
 
-                    setHeatmapCounts ((prev)=>{
-                        return {
-                            ...prev,
-                            [today]: Math.max(0, ((prev[today]||0)+delta)),
-                        }
-                    })
+        if (error) { console.error("Error toggling task:", error); return; }
 
-                    return { ...task, completed: !task.completed };
-                }
-                return task;
-            })
-        );
-        
+        const delta = newDone ? 1 : -1;
+
+
+        setHeatmapCounts((prev) => {
+            return {
+                ...prev,
+                [today]: Math.max(0, ((prev[today] || 0) + delta)),
+            }
+        });
+
+        setTasks(tasks.map((t) => t.id === id ? { ...t, is_done: newDone } : t));
     };
 
-    const deleteTask = (id) => {
-        setTasks(
+    const deleteTask = async (id) => {
+        const { error } = await supabase
+            .from("tasks")
+            .delete()
+            .eq("id",id);
+
+        if(error) console.error("Error deleting task:", error);
+        else setTasks(
             tasks.filter((task) => task.id !== id)
         );
     };
 
     const buildActivityData = () => {
-        const base = { [today]: 0, ...heatmapCounts};
+        const base = { [today]: 0, ...heatmapCounts };
         return Object.entries(base)
-            .map(([date,count])=>({date,count,level: Math.min(count,5)}))
-            .sort((a,b)=> a.date.localeCompare(b.date));
+            .map(([date, count]) => ({ date, count, level: Math.min(count, 5) }))
+            .sort((a, b) => a.date.localeCompare(b.date));
     }
 
 
