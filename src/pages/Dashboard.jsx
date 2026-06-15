@@ -3,24 +3,18 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
 function Dashboard({ user }) {
-    const activityData1 = {
-        "2026-01-05": 3,
-        "2026-02-10": 1,
-        "2026-03-15": 4,
-        "2026-04-20": 2,
-        "2026-06-07": 1,
-    };
 
     const [tasks, setTasks] = useState([]);
     const [taskInput, setTaskInput] = useState("");
 
-    const [heatmapCounts, setHeatmapCounts] = useState(activityData1);
+    const [heatmapCounts, setHeatmapCounts] = useState({});
 
     const today = new Date().toISOString().split('T')[0];
 
 
     useEffect(() => {
         if (!user) return;
+
         const fetchTasks = async () => {
             const { data, error } = await supabase
                 .from("tasks")
@@ -31,10 +25,55 @@ function Dashboard({ user }) {
             if (error) console.error("Error fetching tasks:", error);
             else setTasks(data);
         };
+
+        const fetchActivity = async () => {
+            const { data, error } = await supabase
+                .from("activity_log")
+                .select("*")
+                .eq("user_id", user.id);
+
+            if(error) console.error("Error fetching activity:", error);
+            else{
+                const counts = {};
+                data.forEach((row)=>{
+                    counts[row.date] = row.count;
+                });
+                setHeatmapCounts(counts);
+            }
+        }
+
         fetchTasks();
+        fetchActivity();
     }, [user]);
 
-
+    const updateActivityLog = async (delta) => {
+        const { data, error } = await supabase
+            .from("activity_log")
+            .select("*")
+            .eq("user_id",user.id)
+            .eq("date", today)
+            .single();
+        
+            if (data){
+                const newCount = Math.max(0, data.count + delta);
+                await supabase
+                    .from("activity_log")
+                    .update({count: newCount})
+                    .eq("id", data.id);
+            }
+            else{
+                if(delta>0){
+                    await supabase
+                        .from("activity_log")
+                        .insert({
+                            user_id: user.id,
+                            date: today,
+                            count: 1
+                        });
+                }
+            }
+    }
+    
     const addTask = async () => {
         if (taskInput.trim() === "") return;
 
@@ -68,7 +107,7 @@ function Dashboard({ user }) {
         if (error) { console.error("Error toggling task:", error); return; }
 
         const delta = newDone ? 1 : -1;
-
+        await updateActivityLog(delta);
 
         setHeatmapCounts((prev) => {
             return {
@@ -99,7 +138,6 @@ function Dashboard({ user }) {
             .sort((a, b) => a.date.localeCompare(b.date));
     }
 
-
     return (
         <div className="flex flex-col gap-6">
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
@@ -112,8 +150,9 @@ function Dashboard({ user }) {
                         <input
                             type="text"
                             value={taskInput}
+                            onKeyDown={e => e.key === 'Enter' && addTask()}
                             onChange={(e) => setTaskInput(e.target.value)}
-                            className="min-w-0 border rounded-lg bg-white p-2 flex-1"
+                            className="min-w-0 border rounded-lg bg-white p-2 flex-1 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                             placeholder="Add a new task"
                         />
                         <button
@@ -132,11 +171,11 @@ function Dashboard({ user }) {
                                 <div key={task.id} className="flex gap-6 items-center w-full">
                                     <input
                                         type="checkbox"
-                                        checked={task.completed}
+                                        checked={task.is_done}
                                         onChange={() => toggleTask(task.id)}
                                     />
 
-                                    <span className={task.completed ? "line-through text-gray-500 flex-1" : "flex-1"}>
+                                    <span className={task.is_done ? "line-through text-gray-500 flex-1" : "flex-1"}>
                                         {task.text}
                                     </span>
 

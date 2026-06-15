@@ -36,7 +36,7 @@ function Profile(){
                                setNewName(event.target.value)
                             }
                         }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder="Enter your name"
                     />
                 </div>
@@ -51,7 +51,7 @@ function Profile(){
                                 setNewRoll(event.target.value)
                             }
                         }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder="Enter your roll number"
                     />
                 </div>
@@ -66,7 +66,7 @@ function Profile(){
                                 setNewEmail(event.target.value)
                             }
                         }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder="Enter your email"
                     />
                 </div>
@@ -85,7 +85,7 @@ function Profile(){
                                 setNewSubjects(updated);
                             }
                         }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder={`Enter subject ${index + 1}`}
                     />
                     {subjects.length > 1 && (
