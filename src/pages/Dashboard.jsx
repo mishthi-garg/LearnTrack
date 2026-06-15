@@ -1,6 +1,7 @@
 import { ActivityCalendar } from "react-activity-calendar";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import { NavLink } from "react-router-dom";
 
 function Dashboard({ user }) {
 
@@ -11,6 +12,20 @@ function Dashboard({ user }) {
 
     const today = new Date().toISOString().split('T')[0];
 
+    const [profileComplete, setProfileComplete] = useState(true);
+
+    useEffect(() => {
+        const checkProfile = async () => {
+            const { data } = await supabase
+                .from("profiles")
+                .select("name, roll_no, branch, batch")
+                .eq("id", user.id)
+                .single();
+
+            if (!data || !data.name || !data.roll_no || !data.branch || !data.batch) setProfileComplete(false);
+        };
+        checkProfile();
+    }, [user]);
 
     useEffect(() => {
         if (!user) return;
@@ -73,7 +88,7 @@ function Dashboard({ user }) {
                 }
             }
     }
-    
+
     const addTask = async () => {
         if (taskInput.trim() === "") return;
 
@@ -141,6 +156,19 @@ function Dashboard({ user }) {
     return (
         <div className="flex flex-col gap-6">
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
+
+            {
+                !profileComplete && (
+                    <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex items-center justify-between">
+                        <p className="text-yellow-800 text-sm">Complete your profile to get the most out of LearnTrack.</p>
+                        <NavLink to="/profile" className="text-sm font-bold text-[rgb(75,86,148)] hover:underline">
+                            Click to Complete Profile
+                        </NavLink>
+                    </div>
+
+                )
+            }
+
             <div className="flex gap-6">
 
                 <div className="p-4 rounded-lg bg-[rgb(202,170,152,0.2)] basis-1/3 max-h-64 overflow-y-auto">

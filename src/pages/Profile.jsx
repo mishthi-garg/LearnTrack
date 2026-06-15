@@ -1,26 +1,107 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
 
 
-function Profile(){
-    const [name, setName] = useState("Mishthi Garg");
-    const [roll, setRoll] = useState("24UCC126");
-    const [email,setEmail] = useState("24ucc126@lnmiit.ac.in");
-    const [subjects, setSubjects] = useState([""]);
+function Profile({user}){
+    const [name, setName] = useState("");
+    const [roll, setRoll] = useState("");
+    const [branch,setBranch] = useState("");
+    const [batch, setBatch] = useState("");
+    const [subjects, setSubjects] = useState([{name: "", credits: ""}]);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState("");
     
-    const [newName, setNewName] = useState(name);
-    const [newRoll, setNewRoll] = useState(roll);
-    const [newEmail,setNewEmail] = useState(email);
-    const [newSubjects, setNewSubjects] = useState(subjects);
-    
+    useEffect(()=>{
+        if(!user) return;
+
+        const fetchProfile = async () => {
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", user.id)
+                .single();
+
+            if (data){
+                setName(data.name || "");
+                setRoll(data.roll_no || "");
+                setBranch(data.branch || "");
+                setBatch(data.batch || "");
+            }
+        };
+
+        const fetchSubjects = async()=>{
+            const { data, error } = await supabase
+                .from("subjects")
+                .select("*")
+                .eq("user_id", user.id);
+            if (data && data.length > 0){
+                setSubjects(data.map((s)=> ({name: s.name || "", credits: s.credits || ""})));
+            }
+        };
+
+        fetchProfile();
+        fetchSubjects();
+    }, [user]);
+
+
     const addSubject = () => {
-        setSubjects([...subjects, ""]);
+        setSubjects([...subjects, {name: "", credits: ""}]);
+    };
+
+    const updateSubject = (index, field, value) => {
+        const updated = [...subjects];
+        updated[index][field] = value;
+        setSubjects(updated);
     };
 
     const removeSubject = (index) => {
         setSubjects(subjects.filter((_, i) => i !== index));
     };
 
-    console.log(subjects);
+    const handleSave = async ()=>{
+        setSaving(true);
+        setMessage("");
+
+        const {error: profileError} = await supabase
+            .from("profiles")
+            .upsert({
+                id: user.id,
+                name,
+                roll_no: roll,
+                branch,
+                batch,
+            });
+        if(profileError){
+            console.error("Error saving profile: ", profileError);
+            setMessage("Error saving profile.");
+            setSaving(false);
+            return;
+        }
+
+        await supabase
+            .from("subjects")
+            .delete()
+            .eq("user_id", user.id);
+        
+        const subjectRows = subjects
+            .filter((s) => s.name.trim() != "")
+            .map((s)=>({user_id: user.id, name: s.name, credits: parseFloat(s.credits) || 0}));
+        
+        if(subjectRows.length > 0){
+            const {error: subjectError} = await supabase
+                .from("subjects")
+                .insert(subjectRows);
+            if(subjectError){
+                console.error("Error saving subjects: ", subjectError);
+                setMessage("Error saving subjects");
+                setSaving(false);
+                return
+            }
+        }
+
+        setMessage("Profile saved successfully!");
+        setSaving(false);
+    };
 
     return(
         <div>
@@ -29,11 +110,11 @@ function Profile(){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Name:</label>
                     <input
-                        value={newName}
+                        value={name}
                         type="text"
                         onChange = {
                             (event) =>{
-                               setNewName(event.target.value)
+                               setName(event.target.value)
                             }
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
@@ -44,11 +125,11 @@ function Profile(){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Roll Number:</label>
                     <input
-                        value= {newRoll}
+                        value= {roll}
                         type="text"
                         onChange = {
                             (event) =>{
-                                setNewRoll(event.target.value)
+                                setRoll(event.target.value)
                             }
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
@@ -57,36 +138,61 @@ function Profile(){
                 </div>
 
                 <div className="flex items-center">
-                    <label className="text-lg font-medium">Email:</label>
+                    <label className="text-lg font-medium">Branch:</label>
                     <input
-                        value ={newEmail}
-                        type="email"
+                        value ={branch}
+                        type="text"
                         onChange = {
                             (event) =>{
-                                setNewEmail(event.target.value)
+                                setBranch(event.target.value)
                             }
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your email"
+                        placeholder="Enter your branch"
                     />
                 </div>
-                {subjects.map((_,index)=>(
+
+                <div className="flex items-center">
+                    <label className="text-lg font-medium">Batch:</label>
+                    <input
+                        value ={batch}
+                        type="text"
+                        onChange = {
+                            (event) =>{
+                                setBatch(event.target.value)
+                            }
+                        }
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                        placeholder="Enter your branch"
+                    />
+                </div>
+
+                {subjects.map((subject,index)=>(
                 <div 
                     key={index}
                     className="flex items-center">
                     <label className="text-lg font-medium">Subject {index + 1}:</label>
                     <input
                         type="text"
-                        value={newSubjects[index]}
+                        value={subject.name}
                         onChange = {
                             (event) => {
-                                const updated = [...subjects];
-                                updated[index] = event.target.value;
-                                setNewSubjects(updated);
+                                updateSubject(index, "name", event.target.value)    
                             }
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder={`Enter subject ${index + 1}`}
+                    />
+                    <input
+                        type="text"
+                        value={subject.credits}
+                        onChange = {
+                            (event) => {
+                                updateSubject(index, "credits", event.target.value)    
+                            }
+                        }
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                        placeholder={`Enter subject ${index + 1} credits`}
                     />
                     {subjects.length > 1 && (
                             <button
@@ -103,19 +209,30 @@ function Profile(){
                 <div className="flex justify-center">
                 <button 
                     onClick={addSubject}
-                    className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">Click to add more subjects</button>
+                    className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">
+                        Click to add more subjects
+                </button>
                 </div>
             </div>
+
+            {
+                message && (
+                    <p className={message.includes("Error") ? "text-red-500" : "text-green-600"}>
+                        {message}
+                    </p>
+                )
+            }
+
             <button
-                onClick = {()=>{
-                    setName(newName);
-                    setRoll(newRoll);
-                    setEmail(newEmail);
-                    setSubjects(newSubjects);
-                }}
-                className="bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">SAVE</button>
+                onClick = {handleSave}
+                disabled={saving}
+                className="disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
+                {
+                    saving? "Saving..." : "SAVE"
+                }
+            </button>
         </div>
-    )
+    );
 }
 
 export default Profile;

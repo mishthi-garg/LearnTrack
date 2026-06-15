@@ -15,6 +15,21 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const [profileName, setProfileName] = useState("");
+
+  useEffect(() => {
+      if (!user) return;
+      const fetchName = async () => {
+          const { data } = await supabase
+              .from("profiles")
+              .select("name")
+              .eq("id", user.id)
+              .single();
+          if (data?.name) setProfileName(data.name);
+      };
+      fetchName();
+  }, [user]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -116,7 +131,7 @@ function App() {
                   {
                     isHovered && (
                       <div className="absolute flex flex-col gap-2 right-0 top-6 bg-[rgb(238,238,238)] border border-[rgb(75,64,56)] rounded-xl shadow-lg py-2 px-6 min-w-max items-start">
-                        <p className="font-bold">Mishthi Garg</p>
+                        <p className="font-bold">{profileName || ""}</p>
 
                         <p>{user.email}</p>
                         <NavLink
@@ -149,7 +164,7 @@ function App() {
 
             <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user}/> </ProtectedRoute>} />
             <Route path="/predict" element={<ProtectedRoute user={user}><Predict /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute user={user}><Profile /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user}/></ProtectedRoute>} />
             <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />
             <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor /></ProtectedRoute>} />
           </Routes>
