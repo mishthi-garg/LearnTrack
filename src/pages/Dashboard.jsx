@@ -18,11 +18,11 @@ function Dashboard({ user }) {
         const checkProfile = async () => {
             const { data } = await supabase
                 .from("profiles")
-                .select("name, roll_no, branch, batch")
+                .select("name, roll_no, branch, batch, college")
                 .eq("id", user.id)
                 .single();
 
-            if (!data || !data.name || !data.roll_no || !data.branch || !data.batch) setProfileComplete(false);
+            if (!data || !data.name || !data.roll_no || !data.branch || !data.batch || !data.college) setProfileComplete(false);
         };
         checkProfile();
     }, [user]);

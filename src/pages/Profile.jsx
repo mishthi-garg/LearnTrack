@@ -7,6 +7,7 @@ function Profile({user}){
     const [roll, setRoll] = useState("");
     const [branch,setBranch] = useState("");
     const [batch, setBatch] = useState("");
+    const [college, setCollege] = useState("");
     const [subjects, setSubjects] = useState([{name: "", credits: ""}]);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
@@ -26,6 +27,7 @@ function Profile({user}){
                 setRoll(data.roll_no || "");
                 setBranch(data.branch || "");
                 setBatch(data.batch || "");
+                setCollege(data.college || "");
             }
         };
 
@@ -70,6 +72,7 @@ function Profile({user}){
                 roll_no: roll,
                 branch,
                 batch,
+                college,
             });
         if(profileError){
             console.error("Error saving profile: ", profileError);
@@ -167,6 +170,21 @@ function Profile({user}){
                     />
                 </div>
 
+                <div className="flex items-center">
+                    <label className="text-lg font-medium">College:</label>
+                    <input
+                        value ={college}
+                        type="text"
+                        onChange = {
+                            (event) =>{
+                                setCollege(event.target.value)
+                            }
+                        }
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                        placeholder="Enter your branch"
+                    />
+                </div>
+
                 {subjects.map((subject,index)=>(
                 <div 
                     key={index}
@@ -226,7 +244,7 @@ function Profile({user}){
             <button
                 onClick = {handleSave}
                 disabled={saving}
-                className="disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
+                className="mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
                 {
                     saving? "Saving..." : "SAVE"
                 }
