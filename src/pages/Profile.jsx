@@ -2,18 +2,18 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
 
-function Profile({user}){
+function Profile({ user }) {
     const [name, setName] = useState("");
     const [roll, setRoll] = useState("");
-    const [branch,setBranch] = useState("");
+    const [branch, setBranch] = useState("");
     const [batch, setBatch] = useState("");
     const [college, setCollege] = useState("");
-    const [subjects, setSubjects] = useState([{name: "", credits: ""}]);
+    const [subjects, setSubjects] = useState([{ name: "", credits: "", code: "" }]);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
-    
-    useEffect(()=>{
-        if(!user) return;
+
+    useEffect(() => {
+        if (!user) return;
 
         const fetchProfile = async () => {
             const { data, error } = await supabase
@@ -22,7 +22,7 @@ function Profile({user}){
                 .eq("id", user.id)
                 .single();
 
-            if (data){
+            if (data) {
                 setName(data.name || "");
                 setRoll(data.roll_no || "");
                 setBranch(data.branch || "");
@@ -31,13 +31,13 @@ function Profile({user}){
             }
         };
 
-        const fetchSubjects = async()=>{
+        const fetchSubjects = async () => {
             const { data, error } = await supabase
                 .from("subjects")
                 .select("*")
                 .eq("user_id", user.id);
-            if (data && data.length > 0){
-                setSubjects(data.map((s)=> ({name: s.name || "", credits: s.credits || ""})));
+            if (data && data.length > 0) {
+                setSubjects(data.map((s) => ({ name: s.name || "", credits: s.credits || "", code: s.course_code })));
             }
         };
 
@@ -47,7 +47,7 @@ function Profile({user}){
 
 
     const addSubject = () => {
-        setSubjects([...subjects, {name: "", credits: ""}]);
+        setSubjects([...subjects, { name: "", credits: "", code: "" }]);
     };
 
     const updateSubject = (index, field, value) => {
@@ -60,11 +60,11 @@ function Profile({user}){
         setSubjects(subjects.filter((_, i) => i !== index));
     };
 
-    const handleSave = async ()=>{
+    const handleSave = async () => {
         setSaving(true);
         setMessage("");
 
-        const {error: profileError} = await supabase
+        const { error: profileError } = await supabase
             .from("profiles")
             .upsert({
                 id: user.id,
@@ -74,7 +74,7 @@ function Profile({user}){
                 batch,
                 college,
             });
-        if(profileError){
+        if (profileError) {
             console.error("Error saving profile: ", profileError);
             setMessage("Error saving profile.");
             setSaving(false);
@@ -85,16 +85,16 @@ function Profile({user}){
             .from("subjects")
             .delete()
             .eq("user_id", user.id);
-        
+
         const subjectRows = subjects
             .filter((s) => s.name.trim() != "")
-            .map((s)=>({user_id: user.id, name: s.name, credits: parseFloat(s.credits) || 0}));
-        
-        if(subjectRows.length > 0){
-            const {error: subjectError} = await supabase
+            .map((s) => ({ user_id: user.id, name: s.name, credits: parseFloat(s.credits) || 0, course_code: s.code }));
+
+        if (subjectRows.length > 0) {
+            const { error: subjectError } = await supabase
                 .from("subjects")
                 .insert(subjectRows);
-            if(subjectError){
+            if (subjectError) {
                 console.error("Error saving subjects: ", subjectError);
                 setMessage("Error saving subjects");
                 setSaving(false);
@@ -106,7 +106,7 @@ function Profile({user}){
         setSaving(false);
     };
 
-    return(
+    return (
         <div>
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Edit Profile</h1>
             <div className="flex flex-col gap-4 mt-6">
@@ -115,9 +115,9 @@ function Profile({user}){
                     <input
                         value={name}
                         type="text"
-                        onChange = {
-                            (event) =>{
-                               setName(event.target.value)
+                        onChange={
+                            (event) => {
+                                setName(event.target.value)
                             }
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
@@ -128,10 +128,10 @@ function Profile({user}){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Roll Number:</label>
                     <input
-                        value= {roll}
+                        value={roll}
                         type="text"
-                        onChange = {
-                            (event) =>{
+                        onChange={
+                            (event) => {
                                 setRoll(event.target.value)
                             }
                         }
@@ -143,10 +143,10 @@ function Profile({user}){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Branch:</label>
                     <input
-                        value ={branch}
+                        value={branch}
                         type="text"
-                        onChange = {
-                            (event) =>{
+                        onChange={
+                            (event) => {
                                 setBranch(event.target.value)
                             }
                         }
@@ -158,10 +158,10 @@ function Profile({user}){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Batch:</label>
                     <input
-                        value ={batch}
+                        value={batch}
                         type="text"
-                        onChange = {
-                            (event) =>{
+                        onChange={
+                            (event) => {
                                 setBatch(event.target.value)
                             }
                         }
@@ -173,10 +173,10 @@ function Profile({user}){
                 <div className="flex items-center">
                     <label className="text-lg font-medium">College:</label>
                     <input
-                        value ={college}
+                        value={college}
                         type="text"
-                        onChange = {
-                            (event) =>{
+                        onChange={
+                            (event) => {
                                 setCollege(event.target.value)
                             }
                         }
@@ -185,34 +185,47 @@ function Profile({user}){
                     />
                 </div>
 
-                {subjects.map((subject,index)=>(
-                <div 
-                    key={index}
-                    className="flex items-center">
-                    <label className="text-lg font-medium">Subject {index + 1}:</label>
-                    <input
-                        type="text"
-                        value={subject.name}
-                        onChange = {
-                            (event) => {
-                                updateSubject(index, "name", event.target.value)    
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder={`Enter subject ${index + 1}`}
-                    />
-                    <input
-                        type="text"
-                        value={subject.credits}
-                        onChange = {
-                            (event) => {
-                                updateSubject(index, "credits", event.target.value)    
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder={`Enter subject ${index + 1} credits`}
-                    />
-                    {subjects.length > 1 && (
+                {subjects.map((subject, index) => (
+                    <div
+                        key={index}
+                        className="flex items-center">
+                        <label className="text-lg font-medium">Subject {index + 1}:</label>
+                        <div className="overflow-x-auto py-1">
+                            <input
+                                type="text"
+                                value={subject.name}
+                                onChange={
+                                    (event) => {
+                                        updateSubject(index, "name", event.target.value)
+                                    }
+                                }
+                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                placeholder={`Enter subject ${index + 1}`}
+                            />
+                            <input
+                                type="text"
+                                value={subject.credits}
+                                onChange={
+                                    (event) => {
+                                        updateSubject(index, "credits", event.target.value)
+                                    }
+                                }
+                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                placeholder={`Enter subject ${index + 1} credits`}
+                            />
+                            <input
+                                type="text"
+                                value={subject.code}
+                                onChange={
+                                    (event) => {
+                                        updateSubject(index, "code", event.target.value)
+                                    }
+                                }
+                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                placeholder={`Enter course code`}
+                            />
+                        </div>
+                        {subjects.length > 1 && (
                             <button
                                 onClick={() => removeSubject(index)}
                                 className="ml-4 text-red-600 hover:text-red-400 font-bold text-lg"
@@ -220,16 +233,16 @@ function Profile({user}){
                                 Delete
                             </button>
                         )}
-                </div>
+                    </div>
                 )
-       ) }
-                
+                )}
+
                 <div className="flex justify-center">
-                <button 
-                    onClick={addSubject}
-                    className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">
+                    <button
+                        onClick={addSubject}
+                        className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">
                         Click to add more subjects
-                </button>
+                    </button>
                 </div>
             </div>
 
@@ -242,11 +255,11 @@ function Profile({user}){
             }
 
             <button
-                onClick = {handleSave}
+                onClick={handleSave}
                 disabled={saving}
                 className="mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
                 {
-                    saving? "Saving..." : "SAVE"
+                    saving ? "Saving..." : "SAVE"
                 }
             </button>
         </div>
