@@ -77,6 +77,12 @@ function Predict({ user }) {
     const [inputs, setInputs] = useState({});
     const [saving, setSaving] = useState(null);
 
+    const [grades, setGrades] = useState([]);
+    const [gradeInput, setGradeInput] = useState({});
+    const [savingGrade, setSavingGrade] = useState(false);
+
+    const [newSemester, setNewSemester] = useState("");
+
     useEffect(() => {
         if (!user) return;
 
@@ -89,6 +95,32 @@ function Predict({ user }) {
             else setSubjects(data);
         };
         fetchSubjects();
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchGrades = async () => {
+            const { data, error } = await supabase
+                .from("past_grades")
+                .select("*")
+                .eq("user_id", user.id)
+            if (error) console.error("Error fetching past grades:", error);
+            else {
+                setGrades(data.map((s) => ({
+                    id: s.id,
+                    courseCode: s.course_code || "",
+                    semester: s.semester || "",
+                    grade: s.grade || "",
+                    marks: s.marks || "",
+                    session: s.session || "",
+                    subjectName: s.subject_name || "",
+                    credits: s.credits || "",
+                })));
+
+            }
+        };
+        fetchGrades();
     }, [user]);
 
     useEffect(() => {
@@ -122,6 +154,14 @@ function Predict({ user }) {
                 },
             })
         );
+    };
+
+    const handleGradeInput = (field, value) => {
+        setGradeInput({
+            ...gradeInput,
+            [field]: value,
+        }
+        )
     };
 
     const handleAddMarks = async (subject) => {
@@ -165,6 +205,64 @@ function Predict({ user }) {
         setSaving(null);
     };
 
+
+
+    const removeGrade = async (id) => {
+        const { error } = await supabase
+            .from("past_grades")
+            .delete()
+            .eq("id", id);
+        if (error) console.error("Error deleting grade:", error);
+        else setGrades(grades.filter((g) => g.id !== id));
+    };
+
+    const handleSaveGrade = async (semester) => {
+        setSavingGrade(true);
+
+        const newEntry = {
+            user_id: user.id,
+            course_code: gradeInput.courseCode || "",
+            semester: semester || "",
+            grade: gradeInput.grade || "",
+            marks: parseFloat(gradeInput.marks) || "",
+            session: gradeInput.session || "",
+            subject_name: gradeInput.subjectName || "",
+            credits: parseFloat(gradeInput.credits) || "",
+        };
+
+        const { data, error } = await supabase
+            .from("past_grades")
+            .insert(newEntry)
+            .select()
+            .single();
+
+        if (error) console.error("Error saving grades:", error);
+        else {
+            setGrades((prev) => [...prev, {
+                id: data.id,
+                courseCode: data.course_code || "",
+                semester: data.semester || "",
+                grade: data.grade || "",
+                marks: data.marks || "",
+                session: data.session || "",
+                subjectName: data.subject_name || "",
+                credits: data.credits || "",
+            }])
+        }
+        setGradeInput({
+            courseCode: "",
+            grade: "",
+            marks: "",
+            session: "",
+            subjectName: "",
+            credits: "",
+        })
+        setSavingGrade(false);
+    };
+
+
+
+
     const handleDeleteMark = async (id, courseCode) => {
         const { error } = await supabase
             .from("marks")
@@ -184,20 +282,18 @@ function Predict({ user }) {
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Predict</h1>
             <div className="flex gap-4 mt-4">
                 <button className={`text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
-                    ${
-                        viewMarks === "current" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
+                    ${viewMarks === "current" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
                     }`}
-                    onClick={()=>{
+                    onClick={() => {
                         viewMarks === "current" ? setViewMarks("") : setViewMarks("current");
                     }}
                 >
                     Current Marks Till Now
                 </button>
                 <button className={`text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
-                    ${
-                        viewMarks === "past" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
+                    ${viewMarks === "past" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
                     }`}
-                    onClick={()=>{
+                    onClick={() => {
                         viewMarks === "past" ? setViewMarks("") : setViewMarks("past");
                     }}
                 >
@@ -208,99 +304,269 @@ function Predict({ user }) {
             {
                 (viewMarks === "current") && (
                     <div className="bg-white rounded-lg px-4 py-2 mt-2 max-h-90 overflow-y-auto">
-                {
-                    subjects.length === 0 ? (
-                        <p className="text-gray-500">No subjects found. Please add subjects to your Profile.</p>
-                    ) : (
-                        subjects.map((subject) => (
-                            <div key={subject.id} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
-                                <div className="flex items-center gap-3">
-                                    <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{subject.name}</h2>
-                                    <span className="text-sm text-gray-500">{subject.course_code} | {subject.credits} credits</span>
-                                </div>
+                        {
+                            subjects.length === 0 ? (
+                                <p className="text-gray-500">No subjects found. Please add subjects to your Profile.</p>
+                            ) : (
+                                subjects.map((subject) => (
+                                    <div key={subject.id} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{subject.name}</h2>
+                                            <span className="text-sm text-gray-500">{subject.course_code} | {subject.credits} credits</span>
+                                        </div>
 
-                                {
-                                    marks[subject.course_code] && marks[subject.course_code].length > 0 && (
-                                        <table className="w-full text-sm">
-                                            <thead>
-                                                <tr className="text-left text-gray-500 border-b">
-                                                    <th className="pb-2">Exam Type</th>
-                                                    <th className="pb-2">Marks</th>
-                                                    <th className="pb-2">Maximum Marks</th>
-                                                    <th className="pb-2">Weightage</th>
-                                                    <th className="pb-2"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    marks[subject.course_code].map((m) => (
-                                                        <tr key={m.id} className="border-b border-gray-100">
-                                                            <td className="py2">{m.exam_type}</td>
-                                                            <td className="py-2">{m.marks_scored}</td>
-                                                            <td className="py-2">{m.max_marks}</td>
-                                                            <td className="py-2">{m.weightage}</td>
-                                                            <td className="py-2">
-                                                                <button
-                                                                    onClick={() => handleDeleteMark(m.id, subject.course_code)}
-                                                                    className="text-red-400 hover:text-red-600 text-xs"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </td>
+                                        {
+                                            marks[subject.course_code] && marks[subject.course_code].length > 0 && (
+                                                <table className="w-full text-sm">
+                                                    <thead>
+                                                        <tr className="text-left text-gray-500 border-b">
+                                                            <th className="pb-2">Exam Type</th>
+                                                            <th className="pb-2">Marks</th>
+                                                            <th className="pb-2">Maximum Marks</th>
+                                                            <th className="pb-2">Weightage</th>
+                                                            <th className="pb-2"></th>
                                                         </tr>
-                                                    ))
-                                                }
-                                            </tbody>
-                                        </table>
-                                    )
-                                }
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            marks[subject.course_code].map((m) => (
+                                                                <tr key={m.id} className="border-b border-gray-100">
+                                                                    <td className="py2">{m.exam_type}</td>
+                                                                    <td className="py-2">{m.marks_scored}</td>
+                                                                    <td className="py-2">{m.max_marks}</td>
+                                                                    <td className="py-2">{m.weightage}</td>
+                                                                    <td className="py-2">
+                                                                        <button
+                                                                            onClick={() => handleDeleteMark(m.id, subject.course_code)}
+                                                                            className="text-red-400 hover:text-red-600 text-xs"
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            )
+                                        }
 
-                                <div className="flex gap-3 flex-wrap items-center">
-                                    <input
-                                        type="text"
-                                        placeholder="Exam type (e.g. Mid1)"
-                                        value={inputs[subject.course_code]?.exam_type || ""}
-                                        onChange={(e) => handleInputChange(subject.course_code, "exam_type", e.target.value)}
-                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Marks scored"
-                                        value={inputs[subject.course_code]?.marks_scored || ""}
-                                        onChange={(e) => handleInputChange(subject.course_code, "marks_scored", e.target.value)}
-                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Maximum marks"
-                                        value={inputs[subject.course_code]?.max_marks || ""}
-                                        onChange={(e) => handleInputChange(subject.course_code, "max_marks", e.target.value)}
-                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Weightage"
-                                        value={inputs[subject.course_code]?.weightage || ""}
-                                        onChange={(e) => handleInputChange(subject.course_code, "weightage", e.target.value)}
-                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                    />
-                                    <button
-                                        onClick={() => handleAddMarks(subject)}
-                                        disabled={saving === subject.course_code}
-                                        className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
-                                    >
-                                        {saving === subject.course_code ? "Saving..." : "Add"}
-                                    </button>
-                                </div>
+                                        <div className="flex gap-3 flex-wrap items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="Exam type (e.g. Mid1)"
+                                                value={inputs[subject.course_code]?.exam_type || ""}
+                                                onChange={(e) => handleInputChange(subject.course_code, "exam_type", e.target.value)}
+                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="Marks scored"
+                                                value={inputs[subject.course_code]?.marks_scored || ""}
+                                                onChange={(e) => handleInputChange(subject.course_code, "marks_scored", e.target.value)}
+                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="Maximum marks"
+                                                value={inputs[subject.course_code]?.max_marks || ""}
+                                                onChange={(e) => handleInputChange(subject.course_code, "max_marks", e.target.value)}
+                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="Weightage"
+                                                value={inputs[subject.course_code]?.weightage || ""}
+                                                onChange={(e) => handleInputChange(subject.course_code, "weightage", e.target.value)}
+                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                            />
+                                            <button
+                                                onClick={() => handleAddMarks(subject)}
+                                                disabled={saving === subject.course_code}
+                                                className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                            >
+                                                {saving === subject.course_code ? "Saving..." : "Add"}
+                                            </button>
+                                        </div>
 
-                            </div>
-                        ))
-                    )
-                }
-            </div>
+                                    </div>
+                                ))
+                            )
+                        }
+                    </div>
+                )
+            }
+
+
+            {
+                (viewMarks === "past") && (
+                    <div className="bg-white rounded-lg px-4 py-2 mt-2 max-h-90 overflow-y-auto">
+                        {
+                            (() => {
+                                const grouped = {};
+                                grades.forEach((g, index) => {
+                                    const sem = g.semester || "Unassigned";
+                                    if (!grouped[sem]) grouped[sem] = [];
+                                    grouped[sem].push({ ...g, index });
+                                });
+                                return Object.keys(grouped).length === 0 ? (
+                                    <p className="text-gray-500">No past grades added yet</p>
+                                ) : (
+                                    Object.entries(grouped).map(([semester, semGrades]) => (
+                                        <div key={semester} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
+                                            <div className="flex items-center justify-between">
+                                                <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
+                                                <button
+                                                    onClick={async () => {
+                                                        const idsToDelete = semGrades
+                                                            .filter((g) => !g.id.toString().startsWith("temp-"))
+                                                            .map((g) => g.id);
+
+                                                        if (idsToDelete.length > 0) {
+                                                            await supabase
+                                                                .from("past_grades")
+                                                                .delete()
+                                                                .in("id", idsToDelete);
+                                                        }
+
+                                                        // Remove from local state
+                                                        setGrades(grades.filter((g) => g.semester !== semester));
+                                                    }}
+                                                    className="text-red-400 hover:text-red-600 text-xs"
+                                                >
+                                                    Delete Semester
+                                                </button>
+                                            </div>
+
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="text-left text-gray-500 border-b">
+                                                        <th className="pb-2">Subject</th>
+                                                        <th className="pb-2">Course Code</th>
+                                                        <th className="pb-2">Credits</th>
+                                                        <th className="pb-2">Session</th>
+                                                        <th className="pb-2">Marks</th>
+                                                        <th className="pb-2">Grade</th>
+                                                        <th className="pb-2"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        semGrades.map((g) => (
+                                                            <tr key={g.index} className="border-b border-gray-100">
+                                                                <td className="py2">{g.subjectName}</td>
+                                                                <td className="py-2">{g.courseCode}</td>
+                                                                <td className="py-2">{g.credits}</td>
+                                                                <td className="py-2">{g.session}</td>
+                                                                <td className="py-2">{g.marks}</td>
+                                                                <td className="py-2">{g.grade}</td>
+                                                                <td className="py-2">
+                                                                    <button
+                                                                        onClick={() => removeGrade(g.id)}
+                                                                        className="text-red-400 hover:text-red-600 text-xs"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </tbody>
+                                            </table>
+
+
+
+                                            <div className="flex gap-3 flex-wrap items-center">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Subject name"
+                                                    value={gradeInput.subjectName || ""}
+                                                    onChange={(e) => handleGradeInput("subjectName", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Course Code"
+                                                    value={gradeInput.courseCode || ""}
+                                                    onChange={(e) => handleGradeInput("courseCode", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="Credits"
+                                                    value={gradeInput.credits || ""}
+                                                    onChange={(e) => handleGradeInput("credits", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Session"
+                                                    value={gradeInput.session || ""}
+                                                    onChange={(e) => handleGradeInput("session", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="Marks"
+                                                    value={gradeInput.marks || ""}
+                                                    onChange={(e) => handleGradeInput("marks", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Grade"
+                                                    value={gradeInput.grade || ""}
+                                                    onChange={(e) => handleGradeInput("grade", e.target.value)}
+                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                />
+
+                                                <button
+                                                    onClick={() => handleSaveGrade(semester)}
+                                                    disabled={savingGrade}
+                                                    className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                >
+                                                    {savingGrade ? "Saving..." : "Add"}
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    ))
+                                );
+                            })()
+
+                        }
+                        <div className="flex gap-3 mt-2 items-center">
+                            <input
+                                type="text"
+                                placeholder="New semester (e.g. Sem3)"
+                                value={newSemester}
+                                onChange={(e) => setNewSemester(e.target.value)}
+                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                            />
+                            <button
+                                onClick={() => {
+                                    if (newSemester.trim() === "") return;
+                                    setGrades(
+                                        [...grades, {
+                                            id: "temp-" + Date.now(),
+                                            courseCode: "", subjectName: "", credits: "",
+                                            session: "", marks: "", grade: "",
+                                            semester: newSemester
+                                        }]
+                                    );
+                                    setNewSemester("");
+                                }}
+                                className="bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                            >
+                                Click to add semester
+                            </button>
+                        </div>
+                    </div>
                 )
             }
 
