@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-
+import ChangeSemesterModal from "../components/ChangeSemesterModal"
 
 function Profile({ user }) {
     const [name, setName] = useState("");
@@ -8,10 +8,13 @@ function Profile({ user }) {
     const [branch, setBranch] = useState("");
     const [batch, setBatch] = useState("");
     const [college, setCollege] = useState("");
+    const [semester, setSemester] = useState("");
     const [subjects, setSubjects] = useState([{ name: "", credits: "", code: "" }]);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
 
+    const [showSemesterModal, setShowSemesterModal] = useState(false);
+    
     useEffect(() => {
         if (!user) return;
 
@@ -28,6 +31,7 @@ function Profile({ user }) {
                 setBranch(data.branch || "");
                 setBatch(data.batch || "");
                 setCollege(data.college || "");
+                setSemester(data.semester || "");
             }
         };
 
@@ -73,6 +77,7 @@ function Profile({ user }) {
                 branch,
                 batch,
                 college,
+                semester,
             });
         if (profileError) {
             console.error("Error saving profile: ", profileError);
@@ -105,6 +110,20 @@ function Profile({ user }) {
         setMessage("Profile saved successfully!");
         setSaving(false);
     };
+
+    const handleSemesterComplete = async () => {
+        const nextSemNumber = (parseInt(semester.replace(/\D/g,"")) || 0) + 1;
+        const nextSemester = `SEM${nextSemNumber}`;
+
+        await supabase
+            .from("profiles")
+            .update({semester: nextSemester})
+            .eq("id", user.id);
+        setSubjects([{ name: "", credits: "", code: "" }]);
+        setSemester(nextSemester);
+        setShowSemesterModal(false);
+        setMessage("Semester changed successfully!");
+    }
 
     return (
         <div>
@@ -152,6 +171,17 @@ function Profile({ user }) {
                         }
                         className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
                         placeholder="Enter your branch"
+                    />
+                </div>
+
+                <div className="flex items-center">
+                    <label className="text-lg font-medium">Current Semester:</label>
+                    <input
+                        value={semester}
+                        type="text"
+                        onChange={(e) => setSemester(e.target.value.toUpperCase().replace(/\s/g, ""))}
+                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                        placeholder="Enter your semester"
                     />
                 </div>
 
@@ -262,6 +292,27 @@ function Profile({ user }) {
                     saving ? "Saving..." : "SAVE"
                 }
             </button>
+            <button
+                onClick={() => setShowSemesterModal(true)}
+                className="ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
+            >
+                Udgrade Semester
+            </button>
+            {
+                showSemesterModal && (
+                    <ChangeSemesterModal 
+                        user = {user}
+                        currentSemester={semester}
+                        subjects={subjects.map((s)=>({
+                            name: s.name,
+                            credits: s.credits,
+                            course_code: s.code
+                        }))}
+                        onClose={()=> setShowSemesterModal(false)}
+                        onComplete={handleSemesterComplete}
+                    />
+                )
+            }
         </div>
     );
 }

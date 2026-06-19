@@ -79,9 +79,11 @@ function Predict({ user }) {
 
     const [grades, setGrades] = useState([]);
     const [gradeInput, setGradeInput] = useState({});
-    const [savingGrade, setSavingGrade] = useState(false);
+    const [savingGrade, setSavingGrade] = useState(null);
 
     const [newSemester, setNewSemester] = useState("");
+
+    const formatSemester = (value) => value.toUpperCase().replace(/\s/g, "");
 
     useEffect(() => {
         if (!user) return;
@@ -217,7 +219,7 @@ function Predict({ user }) {
     };
 
     const handleSaveGrade = async (semester) => {
-        setSavingGrade(true);
+        setSavingGrade(semester);
 
         const newEntry = {
             user_id: user.id,
@@ -257,7 +259,7 @@ function Predict({ user }) {
             subjectName: "",
             credits: "",
         })
-        setSavingGrade(false);
+        setSavingGrade(null);
     };
 
 
@@ -412,10 +414,17 @@ function Predict({ user }) {
                                     if (!grouped[sem]) grouped[sem] = [];
                                     grouped[sem].push({ ...g, index });
                                 });
-                                return Object.keys(grouped).length === 0 ? (
+                                const sortedSemesters = Object.keys(grouped).sort((a, b) => {
+                                    const numA = parseInt(a.replace(/\D/g, "")) || 0;
+                                    const numB = parseInt(b.replace(/\D/g, "")) || 0;
+                                    return numA - numB;
+                                });
+                                return sortedSemesters.length === 0 ? (
                                     <p className="text-gray-500">No past grades added yet</p>
                                 ) : (
-                                    Object.entries(grouped).map(([semester, semGrades]) => (
+                                    sortedSemesters.map((semester) => {
+                                        const semGrades = grouped[semester];
+                                        return (
                                         <div key={semester} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
                                             <div className="flex items-center justify-between">
                                                 <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
@@ -455,7 +464,7 @@ function Predict({ user }) {
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        semGrades.map((g) => (
+                                                        semGrades.filter(g => g.courseCode !== "").map((g) => (
                                                             <tr key={g.index} className="border-b border-gray-100">
                                                                 <td className="py2">{g.subjectName}</td>
                                                                 <td className="py-2">{g.courseCode}</td>
@@ -527,15 +536,15 @@ function Predict({ user }) {
 
                                                 <button
                                                     onClick={() => handleSaveGrade(semester)}
-                                                    disabled={savingGrade}
+                                                    disabled={savingGrade === semester}
                                                     className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                                                 >
-                                                    {savingGrade ? "Saving..." : "Add"}
+                                                    {savingGrade === semester ? "Saving..." : "Add"}
                                                 </button>
                                             </div>
 
                                         </div>
-                                    ))
+                                    )})
                                 );
                             })()
 
@@ -543,9 +552,9 @@ function Predict({ user }) {
                         <div className="flex gap-3 mt-2 items-center">
                             <input
                                 type="text"
-                                placeholder="New semester (e.g. Sem3)"
+                                placeholder="New semester (e.g. SEM3)"
                                 value={newSemester}
-                                onChange={(e) => setNewSemester(e.target.value)}
+                                onChange={(e) => setNewSemester(formatSemester(e.target.value))}
                                 className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                             />
                             <button
@@ -605,7 +614,7 @@ function Predict({ user }) {
                 <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Enter expected marks</h2>
                 <div className="flex flex-col gap-4 mt-4">
                     {Object.keys(subjects1).map((subject) => (
-                        <div className="grid grid-cols-3 gap-4 items-center">
+                        <div key={subject} className="grid grid-cols-3 gap-4 items-center">
                             <label className="text-lg font-medium text-[rgb(75,64,56)]">{subject}</label>
                             <input
                                 type="number"
