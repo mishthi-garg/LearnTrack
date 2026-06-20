@@ -167,7 +167,7 @@ function App() {
 
               {
                 menuOpen && (
-                  <div className="md:hidden flex rounded-lg pr-4 pl-2 py-6 shadow-lg flex-col gap-2 border border-[rgb(75,64,56)] bg-[rgb(238,238,238)] absolute right-4 top-16">
+                  <div className="md:hidden flex rounded-lg pr-4 pl-2 py-6 shadow-lg flex-col gap-2 border border-[rgb(75,64,56)] bg-[rgb(238,238,238)] absolute right-4 top-16 z-20">
                     <div className="border-b-1 border-gray-400 pb-2 mb-2">
                       <p className="text-sm font-bold">{profileName || ""}</p>
                       <p className="text-sm">{user.email}</p>
