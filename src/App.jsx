@@ -17,17 +17,19 @@ function App() {
 
   const [profileName, setProfileName] = useState("");
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
-      if (!user) return;
-      const fetchName = async () => {
-          const { data } = await supabase
-              .from("profiles")
-              .select("name")
-              .eq("id", user.id)
-              .single();
-          if (data?.name) setProfileName(data.name);
-      };
-      fetchName();
+    if (!user) return;
+    const fetchName = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+      if (data?.name) setProfileName(data.name);
+    };
+    fetchName();
   }, [user]);
 
   useEffect(() => {
@@ -36,14 +38,14 @@ function App() {
       setAuthLoading(false);
     })
 
-    const {data: { subscription }} = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if(event === 'SIGNED_OUT' || event==='SIGNED_IN' ){
+      if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') {
         setLogoutLoading(false);
       }
     })
 
-  
+
 
     return () => subscription.unsubscribe();
   }, []);
@@ -76,7 +78,7 @@ function App() {
                 LearnTrack
               </NavLink>
 
-              <nav className="absolute left-1/2 -translate-x-1/2 flex gap-6">
+              <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-6">
                 <NavLink
                   to="/"
                   className={({ isActive }) =>
@@ -114,7 +116,7 @@ function App() {
                 </NavLink>
 
               </nav>
-              <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-4">
                 <div
                   className="relative"
                   onMouseEnter={() => setIsHovered(true)}
@@ -146,8 +148,8 @@ function App() {
                           className="disabled:opacity-50 cursor-pointer w-full text-sm bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                         >
                           {
-                            logoutLoading? 'Logging Out...' : 'Logout'
-                            
+                            logoutLoading ? 'Logging Out...' : 'Logout'
+
                           }
                         </button>
                       </div>
@@ -156,15 +158,78 @@ function App() {
                 </div>
 
               </div>
+
+              <button className="md:hidden cursor-pointer text-lg text-[rgb(238,238,238)]"
+                onClick={() => setMenuOpen(!menuOpen)}
+              >
+                <span>&#9776;</span>
+              </button>
+
+              {
+                menuOpen && (
+                  <div className="md:hidden flex rounded-lg pr-4 pl-2 py-6 shadow-lg flex-col gap-2 border border-[rgb(75,64,56)] bg-[rgb(238,238,238)] absolute right-4 top-16">
+                    <div className="border-b-1 border-gray-400 pb-2 mb-2">
+                      <p className="text-sm font-bold">{profileName || ""}</p>
+                      <p className="text-sm">{user.email}</p>
+                    </div>
+                    <NavLink
+                      to="/"
+                      className={({ isActive }) =>
+                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }
+                    >
+                      Dashboard
+                    </NavLink>
+
+                    <NavLink
+                      to="/timetable"
+                      className={({ isActive }) =>
+                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }
+                    >
+                      Timetable
+                    </NavLink>
+
+                    <NavLink
+                      to="/tutor"
+                      className={({ isActive }) =>
+                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }
+                    >
+                      Tutor
+                    </NavLink>
+
+                    <NavLink
+                      to="/predict"
+                      className={({ isActive }) =>
+                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }
+                    >
+                      Predict
+                    </NavLink>
+                    <NavLink
+                      to="/profile"
+                      className={({ isActive }) =>
+                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }
+                    >
+                      Profile
+                    </NavLink>
+                    <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={logoutLoading} className="disabled:opacity-50 cursor-pointer text-sm bg-[rgb(75,86,148)] text-white font-bold px-3 py-2 rounded-lg hover:bg-[rgb(32,41,64)] mt-1">
+                      {logoutLoading ? "Logging Out..." : "Logout"}
+                    </button>
+                  </div>
+                )
+              }
             </div>
           )}
         <div className="p-6">
           <Routes>
             <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
 
-            <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user}/> </ProtectedRoute>} />
-            <Route path="/predict" element={<ProtectedRoute user={user}><Predict user={user}/></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user}/></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user} /> </ProtectedRoute>} />
+            <Route path="/predict" element={<ProtectedRoute user={user}><Predict user={user} /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
             <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />
             <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor /></ProtectedRoute>} />
           </Routes>
