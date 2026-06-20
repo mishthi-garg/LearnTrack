@@ -174,6 +174,7 @@ function App() {
                     </div>
                     <NavLink
                       to="/"
+                      onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
                         isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
                       }
@@ -183,6 +184,7 @@ function App() {
 
                     <NavLink
                       to="/timetable"
+                      onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
                         isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
                       }
@@ -192,6 +194,7 @@ function App() {
 
                     <NavLink
                       to="/tutor"
+                      onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
                         isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
                       }
@@ -201,6 +204,7 @@ function App() {
 
                     <NavLink
                       to="/predict"
+                      onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
                         isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
                       }
@@ -209,6 +213,7 @@ function App() {
                     </NavLink>
                     <NavLink
                       to="/profile"
+                      onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
                         isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
                       }
