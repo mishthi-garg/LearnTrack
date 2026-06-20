@@ -82,6 +82,7 @@ function Predict({ user }) {
     const [savingGrade, setSavingGrade] = useState(null);
 
     const [newSemester, setNewSemester] = useState("");
+    const [newSession, setNewSession] = useState("");
 
     const formatSemester = (value) => value.toUpperCase().replace(/\s/g, "");
 
@@ -218,16 +219,16 @@ function Predict({ user }) {
         else setGrades(grades.filter((g) => g.id !== id));
     };
 
-    const handleSaveGrade = async (semester) => {
+    const handleSaveGrade = async (semester, semesterSession) => {
         setSavingGrade(semester);
-
+        
         const newEntry = {
             user_id: user.id,
             course_code: gradeInput.courseCode || "",
             semester: semester || "",
             grade: gradeInput.grade || "",
             marks: parseFloat(gradeInput.marks) || "",
-            session: gradeInput.session || "",
+            session: semesterSession || "",
             subject_name: gradeInput.subjectName || "",
             credits: parseFloat(gradeInput.credits) || "",
         };
@@ -425,126 +426,120 @@ function Predict({ user }) {
                                     sortedSemesters.map((semester) => {
                                         const semGrades = grouped[semester];
                                         return (
-                                        <div key={semester} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
-                                                <button
-                                                    onClick={async () => {
-                                                        const idsToDelete = semGrades
-                                                            .filter((g) => !g.id.toString().startsWith("temp-"))
-                                                            .map((g) => g.id);
+                                            <div key={semester} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
+                                                    <span className="text-sm text-gray-500">Session {semGrades[0]?.session}</span>
+                                                    <button
+                                                        onClick={async () => {
+                                                            const idsToDelete = semGrades
+                                                                .filter((g) => !g.id.toString().startsWith("temp-"))
+                                                                .map((g) => g.id);
 
-                                                        if (idsToDelete.length > 0) {
-                                                            await supabase
-                                                                .from("past_grades")
-                                                                .delete()
-                                                                .in("id", idsToDelete);
+                                                            if (idsToDelete.length > 0) {
+                                                                await supabase
+                                                                    .from("past_grades")
+                                                                    .delete()
+                                                                    .in("id", idsToDelete);
+                                                            }
+
+                                                            // Remove from local state
+                                                            setGrades(grades.filter((g) => g.semester !== semester));
+                                                        }}
+                                                        className="text-red-400 hover:text-red-600 text-xs"
+                                                    >
+                                                        Delete Semester
+                                                    </button>
+                                                </div>
+
+                                                <table className="w-full text-sm">
+                                                    <thead>
+                                                        <tr className="text-left text-gray-500 border-b">
+                                                            <th className="pb-2">Subject</th>
+                                                            <th className="pb-2">Course Code</th>
+                                                            <th className="pb-2">Credits</th>
+                                                            <th className="pb-2">Marks</th>
+                                                            <th className="pb-2">Grade</th>
+                                                            <th className="pb-2"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            semGrades.filter(g => g.courseCode !== "").map((g) => (
+                                                                <tr key={g.index} className="border-b border-gray-100">
+                                                                    <td className="py2">{g.subjectName}</td>
+                                                                    <td className="py-2">{g.courseCode}</td>
+                                                                    <td className="py-2">{g.credits}</td>
+                                                                    <td className="py-2">{g.marks}</td>
+                                                                    <td className="py-2">{g.grade}</td>
+                                                                    <td className="py-2">
+                                                                        <button
+                                                                            onClick={() => removeGrade(g.id)}
+                                                                            className="text-red-400 hover:text-red-600 text-xs"
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))
                                                         }
+                                                    </tbody>
+                                                </table>
 
-                                                        // Remove from local state
-                                                        setGrades(grades.filter((g) => g.semester !== semester));
-                                                    }}
-                                                    className="text-red-400 hover:text-red-600 text-xs"
-                                                >
-                                                    Delete Semester
-                                                </button>
+
+
+                                                <div className="flex gap-3 flex-wrap items-center">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Subject name"
+                                                        value={gradeInput.subjectName || ""}
+                                                        onChange={(e) => handleGradeInput("subjectName", e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Course Code"
+                                                        value={gradeInput.courseCode || ""}
+                                                        onChange={(e) => handleGradeInput("courseCode", e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        placeholder="Credits"
+                                                        value={gradeInput.credits || ""}
+                                                        onChange={(e) => handleGradeInput("credits", e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        placeholder="Marks"
+                                                        value={gradeInput.marks || ""}
+                                                        onChange={(e) => handleGradeInput("marks", e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Grade"
+                                                        value={gradeInput.grade || ""}
+                                                        onChange={(e) => handleGradeInput("grade", e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+
+                                                    <button
+                                                        onClick={() => handleSaveGrade(semester, semGrades[0]?.session)}
+                                                        disabled={savingGrade === semester}
+                                                        className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                    >
+                                                        {savingGrade === semester ? "Saving..." : "Add"}
+                                                    </button>
+                                                </div>
+
                                             </div>
-
-                                            <table className="w-full text-sm">
-                                                <thead>
-                                                    <tr className="text-left text-gray-500 border-b">
-                                                        <th className="pb-2">Subject</th>
-                                                        <th className="pb-2">Course Code</th>
-                                                        <th className="pb-2">Credits</th>
-                                                        <th className="pb-2">Session</th>
-                                                        <th className="pb-2">Marks</th>
-                                                        <th className="pb-2">Grade</th>
-                                                        <th className="pb-2"></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        semGrades.filter(g => g.courseCode !== "").map((g) => (
-                                                            <tr key={g.index} className="border-b border-gray-100">
-                                                                <td className="py2">{g.subjectName}</td>
-                                                                <td className="py-2">{g.courseCode}</td>
-                                                                <td className="py-2">{g.credits}</td>
-                                                                <td className="py-2">{g.session}</td>
-                                                                <td className="py-2">{g.marks}</td>
-                                                                <td className="py-2">{g.grade}</td>
-                                                                <td className="py-2">
-                                                                    <button
-                                                                        onClick={() => removeGrade(g.id)}
-                                                                        className="text-red-400 hover:text-red-600 text-xs"
-                                                                    >
-                                                                        Delete
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </tbody>
-                                            </table>
-
-
-
-                                            <div className="flex gap-3 flex-wrap items-center">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Subject name"
-                                                    value={gradeInput.subjectName || ""}
-                                                    onChange={(e) => handleGradeInput("subjectName", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Course Code"
-                                                    value={gradeInput.courseCode || ""}
-                                                    onChange={(e) => handleGradeInput("courseCode", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="Credits"
-                                                    value={gradeInput.credits || ""}
-                                                    onChange={(e) => handleGradeInput("credits", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Session"
-                                                    value={gradeInput.session || ""}
-                                                    onChange={(e) => handleGradeInput("session", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    placeholder="Marks"
-                                                    value={gradeInput.marks || ""}
-                                                    onChange={(e) => handleGradeInput("marks", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Grade"
-                                                    value={gradeInput.grade || ""}
-                                                    onChange={(e) => handleGradeInput("grade", e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-
-                                                <button
-                                                    onClick={() => handleSaveGrade(semester)}
-                                                    disabled={savingGrade === semester}
-                                                    className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
-                                                >
-                                                    {savingGrade === semester ? "Saving..." : "Add"}
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                    )})
+                                        )
+                                    })
                                 );
                             })()
 
@@ -557,18 +552,26 @@ function Predict({ user }) {
                                 onChange={(e) => setNewSemester(formatSemester(e.target.value))}
                                 className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                             />
+                            <input
+                                type="text"
+                                placeholder="Session"
+                                value={newSession}
+                                onChange={(e) => setNewSession(e.target.value)}
+                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                            />
                             <button
                                 onClick={() => {
-                                    if (newSemester.trim() === "") return;
+                                    if (newSemester.trim() === "" || newSession.trim() === "") return;
                                     setGrades(
                                         [...grades, {
                                             id: "temp-" + Date.now(),
                                             courseCode: "", subjectName: "", credits: "",
-                                            session: "", marks: "", grade: "",
+                                            session: newSession, marks: "", grade: "",
                                             semester: newSemester
                                         }]
                                     );
                                     setNewSemester("");
+                                    setNewSession("");
                                 }}
                                 className="bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                             >

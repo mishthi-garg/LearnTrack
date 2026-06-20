@@ -93,6 +93,7 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                     subject_name: s.name,
                     credits: s.credits,
                     semester: currentSemester,
+                    session: session,
                     grade: finalGrades[s.course_code],
                     marks: subjectMarks[s.course_code] ?? null,
                 })
@@ -161,44 +162,48 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                 </div>
                 <div className="flex flex-col gap-3">
                     {
-                        subjects.map((subject) => {
-                            if(!subject.course_code) return;
-                            const isSkipped = alreadySaved.includes(subject.course_code);
-                            return (
-                                <div key={subject.id}
-                                    className="flex items-center gap-3"
-                                >
-                                    <span className="flex-1 text-sm">
-                                        {subject.name} <span className="text-gray-400">({subject.course_code})</span>
-                                    </span>
-                                    {
-                                        isSkipped ? (
-                                            <span className="text-sm italic text-[rgb(32,41,64)]">Already saved</span>
-                                        ) : (
-                                            <div className="flex gap-3">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Final marks"
-                                                    value={subjectMarks[subject.course_code] ?? ""}
-                                                    onChange={(e) => setSubjectMarks((prev) => ({
-                                                        ...prev,
-                                                        [subject.course_code]: e.target.value
-                                                    }))}
-                                                    className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Final grade"
-                                                    value={finalGrades[subject.course_code] || ""}
-                                                    onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}
-                                                    className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                />
-                                            </div>
-                                        )
-                                    }
-                                </div>
-                            );
-                        })
+                        subjects.filter((s) => s.course_code).length === 0 ? (
+                            <p className="text-sm text-red-500">No subjects available</p>
+                        ) : (
+                            subjects.map((subject) => {
+                                if (!subject.course_code) return null;
+                                const isSkipped = alreadySaved.includes(subject.course_code);
+                                return (
+                                    <div key={subject.id}
+                                        className="flex items-center gap-3"
+                                    >
+                                        <span className="flex-1 text-sm">
+                                            {subject.name} <span className="text-gray-400">({subject.course_code})</span>
+                                        </span>
+                                        {
+                                            isSkipped ? (
+                                                <span className="text-sm italic text-[rgb(32,41,64)]">Already saved</span>
+                                            ) : (
+                                                <div className="flex gap-3">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Final marks"
+                                                        value={subjectMarks[subject.course_code] ?? ""}
+                                                        onChange={(e) => setSubjectMarks((prev) => ({
+                                                            ...prev,
+                                                            [subject.course_code]: e.target.value
+                                                        }))}
+                                                        className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Final grade"
+                                                        value={finalGrades[subject.course_code] || ""}
+                                                        onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}
+                                                        className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                    />
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+                                );
+                            })
+                        )
                     }
                 </div>
                 <div className="flex justify-end gap-3 mt-6">
