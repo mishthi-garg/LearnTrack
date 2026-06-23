@@ -220,7 +220,7 @@ function Profile({ user }) {
                         key={index}
                         className="flex items-center">
                         <label className="text-lg font-medium">Subject {index + 1}:</label>
-                        <div className="overflow-x-auto py-1">
+                        <div className="overflow-x-auto py-1 px-2">
                             <input
                                 type="text"
                                 value={subject.name}

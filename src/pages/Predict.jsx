@@ -159,11 +159,15 @@ function Predict({ user }) {
         );
     };
 
-    const handleGradeInput = (field, value) => {
-        setGradeInput({
-            ...gradeInput,
-            [field]: value,
-        }
+    const handleGradeInput = (semester, field, value) => {
+        setGradeInput(
+            (prev)=>({
+                ...prev,
+                [semester]: {
+                    ...prev[semester],
+                    [field]: value,
+                }
+            })
         )
     };
 
@@ -492,23 +496,23 @@ function Predict({ user }) {
                                                     <input
                                                         type="text"
                                                         placeholder="Subject name"
-                                                        value={gradeInput.subjectName || ""}
-                                                        onChange={(e) => handleGradeInput("subjectName", e.target.value)}
+                                                        value={gradeInput[semester]?.subjectName || ""}
+                                                        onChange={(e) => handleGradeInput(semester,"subjectName", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Course Code"
-                                                        value={gradeInput.courseCode || ""}
-                                                        onChange={(e) => handleGradeInput("courseCode", e.target.value)}
+                                                        value={gradeInput[semester]?.courseCode || ""}
+                                                        onChange={(e) => handleGradeInput(semester, "courseCode", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="number"
                                                         step="0.01"
                                                         placeholder="Credits"
-                                                        value={gradeInput.credits || ""}
-                                                        onChange={(e) => handleGradeInput("credits", e.target.value)}
+                                                        value={gradeInput[semester]?.credits || ""}
+                                                        onChange={(e) => handleGradeInput(semester, "credits", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
 
@@ -516,15 +520,15 @@ function Predict({ user }) {
                                                         type="number"
                                                         step="0.01"
                                                         placeholder="Marks"
-                                                        value={gradeInput.marks || ""}
-                                                        onChange={(e) => handleGradeInput("marks", e.target.value)}
+                                                        value={gradeInput[semester]?.marks || ""}
+                                                        onChange={(e) => handleGradeInput(semester,"marks", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Grade"
-                                                        value={gradeInput.grade || ""}
-                                                        onChange={(e) => handleGradeInput("grade", e.target.value)}
+                                                        value={gradeInput[semester]?.grade || ""}
+                                                        onChange={(e) => handleGradeInput(semester,"grade", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
 

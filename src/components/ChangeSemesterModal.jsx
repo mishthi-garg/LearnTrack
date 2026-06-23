@@ -151,12 +151,12 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                     If any subjects already saved in Past Grades will be saved automatically.
                 </p>
                 <div className="mb-4">
-                    <label className="text-sm font-medium text-gray-600">Session (e.g. 2024-25):</label>
+                    <label className="text-md text-gray-600 font-bold">Session:</label>
                     <input
                         type="text"
                         value={session}
                         onChange={(e) => setSession(e.target.value)}
-                        placeholder="2024-25"
+                        placeholder="e.g. 2024-25"
                         className="ml-2 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                     />
                 </div>
