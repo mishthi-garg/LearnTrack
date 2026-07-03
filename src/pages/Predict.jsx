@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-
+const BACKEND_URL = "https://learntrack-backend-25iv.onrender.com";
 const subjects1 = {
     OS: [
         { grade: "A", min: 88, max: 100 },
@@ -85,7 +85,35 @@ function Predict({ user }) {
     const [newSession, setNewSession] = useState("");
 
     const formatSemester = (value) => value.toUpperCase().replace(/\s/g, "");
+    const [predictions, setPredictions] = useState({});
+const [predicting, setPredicting] = useState(null);
 
+const handlePredict = async (subject) => {
+    const subjectMarks = marks[subject.course_code];
+    if (!subjectMarks || subjectMarks.length === 0) return;
+
+    setPredicting(subject.course_code);
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/predict`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_id: user.id,
+                course_code: subject.course_code,
+            }),
+        });
+        const result = await response.json();
+        setPredictions((prev) => ({
+            ...prev,
+            [subject.course_code]: result,
+        }));
+    } catch (err) {
+        console.error("Prediction error:", err);
+    }
+
+    setPredicting(null);
+};
     useEffect(() => {
         if (!user) return;
 
@@ -398,7 +426,29 @@ function Predict({ user }) {
                                                 {saving === subject.course_code ? "Saving..." : "Add"}
                                             </button>
                                         </div>
+                                        <div className="flex items-center gap-4 mt-2">
+    <button
+        onClick={() => handlePredict(subject)}
+        disabled={predicting === subject.course_code || !marks[subject.course_code]?.length}
+        className="bg-[rgb(32,41,64)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(75,86,148)]"
+    >
+        {predicting === subject.course_code ? "Predicting..." : "Predict Grade"}
+    </button>
 
+    {predictions[subject.course_code] && (
+        <div className="flex items-center gap-3">
+            <span className="font-bold text-xl text-[rgb(32,41,64)]">
+                {predictions[subject.course_code].predicted_grade}
+            </span>
+            <span className="text-sm text-gray-500">
+                {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
+            </span>
+            <span className="text-xs text-gray-400">
+                z-score: {predictions[subject.course_code].overall_z}
+            </span>
+        </div>
+    )}
+</div>
                                     </div>
                                 ))
                             )
