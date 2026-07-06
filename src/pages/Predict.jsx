@@ -73,12 +73,12 @@ function SubjectPanel({ ranges, predictedGrade }) {
                             key={g.grade}
                             className={`flex gap-4 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
                                 ${predictedGrade === g.grade
-                                    ? "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] scale-105 shadow-md"
+                                    ? "bg-yellow-50 text-yellow-800 scale-105 shadow-md"
                                     : "bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]"
                                 }`}
                         >
                             <span className="font-bold text-lg">{g.grade}</span>
-                            <span className="text-sm">{g.min}–{g.max}%</span>
+                            <span className="text-sm">{g.min}–{g.max}</span>
                         </div>
                     ))}
                 </div>
@@ -140,52 +140,52 @@ function Predict({ user }) {
     };
 
     const computeGradeRanges = (mean, std, boundaries) => {
-    // boundaries from model_stats.json e.g. { "F_to_D": -2.45, "D_to_CD": -1.82, ... }
-    const cutoffs = [
-        { grade: "A",  minZ: boundaries?.AB_to_A ?? 1.5 },
-        { grade: "AB", minZ: boundaries?.BC_to_AB ?? 0.75 },
-        { grade: "BC", minZ: boundaries?.C_to_BC ?? 0 },
-        { grade: "C",  minZ: boundaries?.CD_to_C ?? -0.75 },
-        { grade: "CD", minZ: boundaries?.D_to_CD ?? -1.5 },
-        { grade: "D",  minZ: boundaries?.F_to_D ?? -2.0 },
-        { grade: "F",  minZ: -Infinity },
-    ];
+        // boundaries from model_stats.json e.g. { "F_to_D": -2.45, "D_to_CD": -1.82, ... }
+        const cutoffs = [
+            { grade: "A", minZ: boundaries?.AB_to_A ?? 1.5 },
+            { grade: "AB", minZ: boundaries?.BC_to_AB ?? 0.75 },
+            { grade: "BC", minZ: boundaries?.C_to_BC ?? 0 },
+            { grade: "C", minZ: boundaries?.CD_to_C ?? -0.75 },
+            { grade: "CD", minZ: boundaries?.D_to_CD ?? -1.5 },
+            { grade: "D", minZ: boundaries?.F_to_D ?? -2.0 },
+            { grade: "F", minZ: -Infinity },
+        ];
 
-    return cutoffs.map((c, i) => {
-        const minPct = c.minZ === -Infinity ? 0 : mean + c.minZ * std;
-        const maxPct = i === 0 ? 1 : mean + cutoffs[i - 1].minZ * std;
-        return {
-            grade: c.grade,
-            min: Math.max(0, Math.round(minPct * 100)),
-            max: Math.min(100, Math.round(maxPct * 100)),
-        };
-    });
-};
+        return cutoffs.map((c, i) => {
+            const minPct = c.minZ === -Infinity ? 0 : mean + c.minZ * std;
+            const maxPct = i === 0 ? 1 : mean + cutoffs[i - 1].minZ * std;
+            return {
+                grade: c.grade,
+                min: Math.max(0, Math.round(minPct * 100)),
+                max: Math.min(100, Math.round(maxPct * 100)),
+            };
+        });
+    };
 
     useEffect(() => {
         if (!subjects || subjects.length === 0) return;
 
         const fetchCohortStats = async () => {
-    const results = {};
-    await Promise.all(subjects.map(async (subject) => {
-        try {
-            const response = await fetch(`${BACKEND_URL}/cohort-stats`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ course_code: subject.course_code }),
-            });
-            
-            const text = await response.text();
-            console.log("Raw response for", subject.course_code, ":", text);
-            
-            const data = JSON.parse(text);
-            results[subject.course_code] = data;
-        } catch (err) {
-            console.error("Error fetching cohort stats for", subject.course_code, err);
-        }
-    }));
-    setCohortStats(results);
-};
+            const results = {};
+            await Promise.all(subjects.map(async (subject) => {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/cohort-stats`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ course_code: subject.course_code }),
+                    });
+
+                    const text = await response.text();
+                    console.log("Raw response for", subject.course_code, ":", text);
+
+                    const data = JSON.parse(text);
+                    results[subject.course_code] = data;
+                } catch (err) {
+                    console.error("Error fetching cohort stats for", subject.course_code, err);
+                }
+            }));
+            setCohortStats(results);
+        };
 
         fetchCohortStats();
     }, [subjects]);
@@ -739,36 +739,44 @@ function Predict({ user }) {
                     ))}
                 </div> */}
                 {subjects.length === 0 ? (
-        <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
-    ) : (
-        <div className="flex gap-4 overflow-x-auto my-2">
-            {subjects.map((subject) => (
-                <button
-                    key={subject.id}
-                    onClick={() => setSelectedSubject(
-                        selectedSubject === subject.course_code ? null : subject.course_code
-                    )}
-                    className={`font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
+                    <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
+                ) : (
+                    <div className="flex gap-4 overflow-x-auto my-2">
+                        {subjects.map((subject) => (
+                            <button
+                                key={subject.id}
+                                onClick={() => setSelectedSubject(
+                                    selectedSubject === subject.course_code ? null : subject.course_code
+                                )}
+                                className={`font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
                         ${selectedSubject === subject.course_code ?
-                            "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
-                            : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"
-                        }`}
-                >
-                    {subject.name}
-                </button>
-            ))}
-        </div>
-    )}
+                                        "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
+                                        : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"
+                                    }`}
+                            >
+                                {subject.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 {
-                    selectedSubject && (
-                        // <SubjectPanel
-                        //     subject={selectedSubject}
-                        // />
-                        <SubjectPanel
-        ranges={computeGradeRanges(stats.cohort_mean, stats.cohort_std, stats.grade_boundaries)}
-        predictedGrade={prediction?.predicted_grade}
-    />
-                    )
+                    selectedSubject && (() => {
+                        const subject = subjects.find((s) => s.course_code === selectedSubject);
+                        const prediction = predictions[selectedSubject];
+                        const isPredicting = predicting === selectedSubject;
+                        const stats = cohortStats[selectedSubject];
+                         if (!stats) return <p className="text-gray-400 text-sm mt-2">Loading...</p>;
+
+                        return (
+                            // <SubjectPanel
+                            //     subject={selectedSubject}
+                            // />
+                            <SubjectPanel
+                                ranges={computeGradeRanges(stats.cohort_mean, stats.cohort_std, stats.grade_boundaries)}
+                                predictedGrade={prediction?.predicted_grade}
+                            />
+                        )
+                    })()
                 }
             </div>
             {/* <div>
