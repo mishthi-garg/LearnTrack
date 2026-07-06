@@ -47,10 +47,10 @@ function Dashboard({ user }) {
                 .select("*")
                 .eq("user_id", user.id);
 
-            if(error) console.error("Error fetching activity:", error);
-            else{
+            if (error) console.error("Error fetching activity:", error);
+            else {
                 const counts = {};
-                data.forEach((row)=>{
+                data.forEach((row) => {
                     counts[row.date] = row.count;
                 });
                 setHeatmapCounts(counts);
@@ -65,28 +65,28 @@ function Dashboard({ user }) {
         const { data, error } = await supabase
             .from("activity_log")
             .select("*")
-            .eq("user_id",user.id)
+            .eq("user_id", user.id)
             .eq("date", today)
             .single();
-        
-            if (data){
-                const newCount = Math.max(0, data.count + delta);
+
+        if (data) {
+            const newCount = Math.max(0, data.count + delta);
+            await supabase
+                .from("activity_log")
+                .update({ count: newCount })
+                .eq("id", data.id);
+        }
+        else {
+            if (delta > 0) {
                 await supabase
                     .from("activity_log")
-                    .update({count: newCount})
-                    .eq("id", data.id);
+                    .insert({
+                        user_id: user.id,
+                        date: today,
+                        count: 1
+                    });
             }
-            else{
-                if(delta>0){
-                    await supabase
-                        .from("activity_log")
-                        .insert({
-                            user_id: user.id,
-                            date: today,
-                            count: 1
-                        });
-                }
-            }
+        }
     }
 
     const addTask = async () => {
@@ -113,34 +113,37 @@ function Dashboard({ user }) {
     const toggleTask = async (id) => {
         const task = tasks.find((t) => t.id === id);
         const newDone = !task.is_done;
-
+        const completedAt = newDone ? today : null;
+        //checking any task-> +1, unchecking todays completed -> -1, unchecking older completed -> 0
         const { error } = await supabase
             .from("tasks")
-            .update({ is_done: newDone })
+            .update({ is_done: newDone, completed_at: completedAt })
             .eq("id", id)
 
         if (error) { console.error("Error toggling task:", error); return; }
+        const wasCompletedToday = task.completed_at === today;
+        if (newDone || wasCompletedToday) {
+            const delta = newDone ? 1 : -1;
+            await updateActivityLog(delta);
 
-        const delta = newDone ? 1 : -1;
-        await updateActivityLog(delta);
+            setHeatmapCounts((prev) => {
+                return {
+                    ...prev,
+                    [today]: Math.max(0, ((prev[today] || 0) + delta)),
+                }
+            });
+        }
 
-        setHeatmapCounts((prev) => {
-            return {
-                ...prev,
-                [today]: Math.max(0, ((prev[today] || 0) + delta)),
-            }
-        });
-
-        setTasks(tasks.map((t) => t.id === id ? { ...t, is_done: newDone } : t));
+        setTasks(tasks.map((t) => t.id === id ? { ...t, is_done: newDone, completed_at: completedAt } : t));
     };
 
     const deleteTask = async (id) => {
         const { error } = await supabase
             .from("tasks")
             .delete()
-            .eq("id",id);
+            .eq("id", id);
 
-        if(error) console.error("Error deleting task:", error);
+        if (error) console.error("Error deleting task:", error);
         else setTasks(
             tasks.filter((task) => task.id !== id)
         );
@@ -152,7 +155,7 @@ function Dashboard({ user }) {
             .map(([date, count]) => ({ date, count, level: Math.min(count, 5) }))
             .sort((a, b) => a.date.localeCompare(b.date));
     }
-
+    console.log(buildActivityData());
     return (
         <div className="flex flex-col gap-6">
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
@@ -223,6 +226,23 @@ function Dashboard({ user }) {
                     <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Activity</h2>
                     <ActivityCalendar
                         data={buildActivityData()}
+                        colorScheme="light"
+                        theme={{
+                            light: [
+                                "#F8F3EA", // 0 activity
+                                "#c3b6a1", // low
+                                "#948470", // medium
+                                "#725e4b", // high
+                                "#513f2e", // very high
+                            ],
+                            dark: [
+                                "#513f2e",
+                                "#725e4b",
+                                "#948470",
+                                "#c3b6a1",
+                                "#F8F3EA",
+                            ],
+                        }}
                         hideMonthLabels={false}
                         hideTotalCount={true}
                         hideColorLegend={false}
