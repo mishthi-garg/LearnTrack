@@ -24,6 +24,51 @@ app.get("/", (req, res) => {
     res.json({ status: "LearnTrack Backend is running" });
 });
 
+app.post("/cohort-stats", async (req, res) => {
+    const { course_code } = req.body;
+
+    const { data: cohortData, error } = await supabase
+        .from("marks")
+        .select("user_id, marks_scored, max_marks, weightage")
+        .eq("course_code", course_code);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const cohortByUser = {};
+    cohortData?.forEach((m) => {
+        if (!m.max_marks || !m.weightage || m.max_marks === 0) return;
+        if (!cohortByUser[m.user_id]) cohortByUser[m.user_id] = { sum: 0, weight: 0 };
+        cohortByUser[m.user_id].sum += (m.marks_scored / m.max_marks) * m.weightage;
+        cohortByUser[m.user_id].weight += m.weightage;
+    });
+
+    const cohortScores = Object.values(cohortByUser)
+        .filter((u) => u.weight > 0)
+        .map((u) => u.sum / u.weight);
+
+    const cohortStudentCount = cohortScores.length;
+
+    let cohortMean, cohortStd;
+    if (cohortStudentCount >= MIN_COHORT_SIZE) {
+        cohortMean = cohortScores.reduce((a, b) => a + b, 0) / cohortScores.length;
+        cohortStd = Math.sqrt(
+            cohortScores.reduce((sum, s) => sum + Math.pow(s - cohortMean, 2), 0) / cohortScores.length
+        );
+    } else {
+        cohortMean = TRAINING_MEAN;
+        cohortStd = TRAINING_STD;
+    }
+
+    return res.json({
+        course_code,
+        cohort_mean: parseFloat(cohortMean.toFixed(3)),
+        cohort_std: parseFloat(cohortStd.toFixed(3)),
+        cohort_size: cohortStudentCount,
+        using_fallback: cohortStudentCount < MIN_COHORT_SIZE,
+        grade_boundaries: modelStats.grade_boundaries,
+    });
+});
+
 app.post("/predict", async (req, res) => {
     const { user_id, course_code } = req.body;
     console.log("user_id:", user_id);

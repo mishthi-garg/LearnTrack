@@ -40,22 +40,45 @@ const subjects1 = {
     ],
 };
 
-function SubjectPanel({ subject }) {
-    const ranges = subjects1[subject];
+// function SubjectPanel({ subject }) {
+//     const ranges = subjects1[subject];
 
 
+//     return (
+//         <div className="my-4 flex items-center justify-center">
+//             <div className="border-2 border-[rgb(75,64,56)] bg-[rgb(238,238,238)] rounded-2xl shadow-xl p-6 overflow-x-auto">
+
+//                 <div className="flex gap-2">
+//                     {ranges.map((g) => (
+//                         <div
+//                             key={g.grade}
+//                             className={`flex gap-4 items-center justify-between px-4 py-3 rounded-lg bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]`}
+//                         >
+//                             <span className="font-bold text-lg">{g.grade}</span>
+//                             <span className="text-sm">{g.min} – {g.max} marks</span>
+//                         </div>
+//                     ))}
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+function SubjectPanel({ ranges, predictedGrade }) {
     return (
         <div className="my-4 flex items-center justify-center">
             <div className="border-2 border-[rgb(75,64,56)] bg-[rgb(238,238,238)] rounded-2xl shadow-xl p-6 overflow-x-auto">
-
                 <div className="flex gap-2">
                     {ranges.map((g) => (
                         <div
                             key={g.grade}
-                            className={`flex gap-4 items-center justify-between px-4 py-3 rounded-lg bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]`}
+                            className={`flex gap-4 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+                                ${predictedGrade === g.grade
+                                    ? "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] scale-105 shadow-md"
+                                    : "bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]"
+                                }`}
                         >
                             <span className="font-bold text-lg">{g.grade}</span>
-                            <span className="text-sm">{g.min} – {g.max} marks</span>
+                            <span className="text-sm">{g.min}–{g.max}%</span>
                         </div>
                     ))}
                 </div>
@@ -86,34 +109,87 @@ function Predict({ user }) {
 
     const formatSemester = (value) => value.toUpperCase().replace(/\s/g, "");
     const [predictions, setPredictions] = useState({});
-const [predicting, setPredicting] = useState(null);
+    const [predicting, setPredicting] = useState(null);
+    const [cohortStats, setCohortStats] = useState({});
 
-const handlePredict = async (subject) => {
-    const subjectMarks = marks[subject.course_code];
-    if (!subjectMarks || subjectMarks.length === 0) return;
+    const handlePredict = async (subject) => {
+        const subjectMarks = marks[subject.course_code];
+        if (!subjectMarks || subjectMarks.length === 0) return;
 
-    setPredicting(subject.course_code);
+        setPredicting(subject.course_code);
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/predict`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                user_id: user.id,
-                course_code: subject.course_code,
-            }),
-        });
-        const result = await response.json();
-        setPredictions((prev) => ({
-            ...prev,
-            [subject.course_code]: result,
-        }));
-    } catch (err) {
-        console.error("Prediction error:", err);
-    }
+        try {
+            const response = await fetch(`${BACKEND_URL}/predict`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    course_code: subject.course_code,
+                }),
+            });
+            const result = await response.json();
+            setPredictions((prev) => ({
+                ...prev,
+                [subject.course_code]: result,
+            }));
+        } catch (err) {
+            console.error("Prediction error:", err);
+        }
 
-    setPredicting(null);
+        setPredicting(null);
+    };
+
+    const computeGradeRanges = (mean, std, boundaries) => {
+    // boundaries from model_stats.json e.g. { "F_to_D": -2.45, "D_to_CD": -1.82, ... }
+    const cutoffs = [
+        { grade: "A",  minZ: boundaries?.AB_to_A ?? 1.5 },
+        { grade: "AB", minZ: boundaries?.BC_to_AB ?? 0.75 },
+        { grade: "BC", minZ: boundaries?.C_to_BC ?? 0 },
+        { grade: "C",  minZ: boundaries?.CD_to_C ?? -0.75 },
+        { grade: "CD", minZ: boundaries?.D_to_CD ?? -1.5 },
+        { grade: "D",  minZ: boundaries?.F_to_D ?? -2.0 },
+        { grade: "F",  minZ: -Infinity },
+    ];
+
+    return cutoffs.map((c, i) => {
+        const minPct = c.minZ === -Infinity ? 0 : mean + c.minZ * std;
+        const maxPct = i === 0 ? 1 : mean + cutoffs[i - 1].minZ * std;
+        return {
+            grade: c.grade,
+            min: Math.max(0, Math.round(minPct * 100)),
+            max: Math.min(100, Math.round(maxPct * 100)),
+        };
+    });
 };
+
+    useEffect(() => {
+        if (!subjects || subjects.length === 0) return;
+
+        const fetchCohortStats = async () => {
+    const results = {};
+    await Promise.all(subjects.map(async (subject) => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/cohort-stats`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ course_code: subject.course_code }),
+            });
+            
+            const text = await response.text();
+            console.log("Raw response for", subject.course_code, ":", text);
+            
+            const data = JSON.parse(text);
+            results[subject.course_code] = data;
+        } catch (err) {
+            console.error("Error fetching cohort stats for", subject.course_code, err);
+        }
+    }));
+    setCohortStats(results);
+};
+
+        fetchCohortStats();
+    }, [subjects]);
+
     useEffect(() => {
         if (!user) return;
 
@@ -189,7 +265,7 @@ const handlePredict = async (subject) => {
 
     const handleGradeInput = (semester, field, value) => {
         setGradeInput(
-            (prev)=>({
+            (prev) => ({
                 ...prev,
                 [semester]: {
                     ...prev[semester],
@@ -253,7 +329,7 @@ const handlePredict = async (subject) => {
 
     const handleSaveGrade = async (semester, semesterSession) => {
         setSavingGrade(semester);
-        
+
         const newEntry = {
             user_id: user.id,
             course_code: gradeInput.courseCode || "",
@@ -315,6 +391,9 @@ const handlePredict = async (subject) => {
     return (
         <div>
             <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Predict</h1>
+            <div className="italic bg-yellow-50 border border-yellow-300 my-4 p-4 rounded-lg text-yellow-800">
+                Since the grades are relative, predictions will be based using a placeholder mean and standard deviation until 30+ students join the platform and provide marks for the same course.
+            </div>
             <div className="flex gap-4 mt-4">
                 <button className={`text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
                     ${viewMarks === "current" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
@@ -339,6 +418,7 @@ const handlePredict = async (subject) => {
             {
                 (viewMarks === "current") && (
                     <div className="bg-white rounded-lg px-4 py-2 mt-2 max-h-90 overflow-y-auto">
+
                         {
                             subjects.length === 0 ? (
                                 <p className="text-gray-500">No subjects found. Please add subjects to your Profile.</p>
@@ -427,28 +507,28 @@ const handlePredict = async (subject) => {
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-4 mt-2">
-    <button
-        onClick={() => handlePredict(subject)}
-        disabled={predicting === subject.course_code || !marks[subject.course_code]?.length}
-        className="bg-[rgb(32,41,64)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(75,86,148)]"
-    >
-        {predicting === subject.course_code ? "Predicting..." : "Predict Grade"}
-    </button>
+                                            <button
+                                                onClick={() => handlePredict(subject)}
+                                                disabled={predicting === subject.course_code || !marks[subject.course_code]?.length}
+                                                className="text-[rgb(32,41,64)] cursor-pointer border transition duration-200 disabled:opacity-50 hover:text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                            >
+                                                {predicting === subject.course_code ? "Predicting..." : "Predict Grade"}
+                                            </button>
 
-    {predictions[subject.course_code] && (
-        <div className="flex items-center gap-3">
-            <span className="font-bold text-xl text-[rgb(32,41,64)]">
-                {predictions[subject.course_code].predicted_grade}
-            </span>
-            <span className="text-sm text-gray-500">
-                {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
-            </span>
-            <span className="text-xs text-gray-400">
-                z-score: {predictions[subject.course_code].overall_z}
-            </span>
-        </div>
-    )}
-</div>
+                                            {predictions[subject.course_code] && (
+                                                <div className="bg-yellow-50 rounded-full px-4 flex items-center gap-3">
+                                                    <span className="font-bold text-xl text-[rgb(32,41,64)]">
+                                                        {predictions[subject.course_code].predicted_grade}
+                                                    </span>
+                                                    <span className="text-sm text-gray-500">
+                                                        {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        z-score [ {predictions[subject.course_code].overall_z} ]
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ))
                             )
@@ -547,7 +627,7 @@ const handlePredict = async (subject) => {
                                                         type="text"
                                                         placeholder="Subject name"
                                                         value={gradeInput[semester]?.subjectName || ""}
-                                                        onChange={(e) => handleGradeInput(semester,"subjectName", e.target.value)}
+                                                        onChange={(e) => handleGradeInput(semester, "subjectName", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
@@ -571,14 +651,14 @@ const handlePredict = async (subject) => {
                                                         step="0.01"
                                                         placeholder="Marks"
                                                         value={gradeInput[semester]?.marks || ""}
-                                                        onChange={(e) => handleGradeInput(semester,"marks", e.target.value)}
+                                                        onChange={(e) => handleGradeInput(semester, "marks", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Grade"
                                                         value={gradeInput[semester]?.grade || ""}
-                                                        onChange={(e) => handleGradeInput(semester,"grade", e.target.value)}
+                                                        onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
 
@@ -640,7 +720,7 @@ const handlePredict = async (subject) => {
                 <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Current Predictions</h2>
                 <p className="text-[rgb(75,64,56)] my-1">Select a subject to view predicted grades.</p>
 
-                <div className="flex gap-4 overflow-x-auto my-2">
+                {/* <div className="flex gap-4 overflow-x-auto my-2">
                     {Object.keys(subjects1).map((subject) => (
                         <button
                             key={subject}
@@ -657,17 +737,41 @@ const handlePredict = async (subject) => {
                             {subject}
                         </button>
                     ))}
-                </div>
-
+                </div> */}
+                {subjects.length === 0 ? (
+        <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
+    ) : (
+        <div className="flex gap-4 overflow-x-auto my-2">
+            {subjects.map((subject) => (
+                <button
+                    key={subject.id}
+                    onClick={() => setSelectedSubject(
+                        selectedSubject === subject.course_code ? null : subject.course_code
+                    )}
+                    className={`font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
+                        ${selectedSubject === subject.course_code ?
+                            "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
+                            : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"
+                        }`}
+                >
+                    {subject.name}
+                </button>
+            ))}
+        </div>
+    )}
                 {
                     selectedSubject && (
+                        // <SubjectPanel
+                        //     subject={selectedSubject}
+                        // />
                         <SubjectPanel
-                            subject={selectedSubject}
-                        />
+        ranges={computeGradeRanges(stats.cohort_mean, stats.cohort_std, stats.grade_boundaries)}
+        predictedGrade={prediction?.predicted_grade}
+    />
                     )
                 }
             </div>
-            <div>
+            {/* <div>
                 <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Enter expected marks</h2>
                 <div className="flex flex-col gap-4 mt-4">
                     {Object.keys(subjects1).map((subject) => (
@@ -698,7 +802,7 @@ const handlePredict = async (subject) => {
             <div className="bg-[rgb(202,170,152,0.2)] p-4 mt-6 flex-1 overflow-x-auto rounded-lg">
                 <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Improvements</h2>
                 <p className="text-gray-500 my-4">No suggestions available.</p>
-            </div>
+            </div> */}
         </div>
     )
 }
