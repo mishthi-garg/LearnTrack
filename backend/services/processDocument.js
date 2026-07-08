@@ -5,6 +5,9 @@ const vision = require("@google-cloud/vision");
 const { supabase, getEmbedding } = require("../lib/client.js");
 const mammoth = require("mammoth");
 
+
+const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+
 const visionClient = new vision.ImageAnnotatorClient();
 
 function chunkText(text, wordsPerChunk = 400) {
