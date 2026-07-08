@@ -9,10 +9,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+function normalize(vec) {
+  const norm = Math.sqrt(vec.reduce((sum, v) => sum + v * v, 0));
+  return vec.map((v) => v / norm);
+}
+
 async function getEmbedding(text) {
-  const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
-  const result = await model.embedContent(text);
-  return result.embedding.values; // array of 768 floats
+  const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+  const result = await model.embedContent(text, { outputDimensionality: 768 });
+  return normalize(result.embedding.values);
 }
 
 module.exports = {
