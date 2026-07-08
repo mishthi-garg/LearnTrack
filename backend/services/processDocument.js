@@ -1,7 +1,7 @@
 // services/processDocument.js
 const pkg = require("pdf-parse");
 const pdfParse = pkg.default || pkg;
-const { fromBuffer } = require("pdf2pic");
+const { pdfToImageBuffers } = require("./pdfToImages.js");
 const vision = require("@google-cloud/vision");
 const { supabase, getEmbedding } = require("../lib/client.js");
 const mammoth = require("mammoth");
@@ -43,24 +43,18 @@ async function extractFromPDF(fileBuffer) {
 }
 
 async function extractViaOCR(fileBuffer) {
-  const converter = fromBuffer(fileBuffer, {
-    density: 200,
-    format: "png",
-    width: 1600,
-    height: 2000,
-  });
-
-  // Convert all pages — pdf2pic needs page count; get it via pdf-parse metadata
-  const pdfMeta = await pdfParse(fileBuffer);
-  const numPages = pdfMeta.numpages || 1;
+  const imageBuffers = await pdfToImageBuffers(fileBuffer);
 
   let fullText = "";
 
-  for (let page = 1; page <= numPages; page++) {
-    const result = await converter(page, { responseType: "buffer" });
-    console.dir(result, { depth: null });
+  for (const imgBuffer of imageBuffers) {
+    if (!imgBuffer || imgBuffer.length === 0) {
+      console.warn("Empty page image, skipping");
+      continue;
+    }
+console.log("Page image buffer length:", imgBuffer.length);
     const [ocrResult] = await visionClient.textDetection({
-      image: { content: result.buffer },
+      image: { content: imgBuffer },
     });
     const pageText = ocrResult.fullTextAnnotation?.text || "";
     fullText += pageText + "\n";
