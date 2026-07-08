@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-const BACKEND_URL = process.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const subjects1 = {
     OS: [
         { grade: "A", min: 88, max: 100 },
