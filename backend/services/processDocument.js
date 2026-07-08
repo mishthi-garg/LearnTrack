@@ -1,5 +1,6 @@
 // services/processDocument.js
-const pdfParse = require("pdf-parse");
+const pkg = require("pdf-parse");
+const pdfParse = pkg.default || pkg;
 const { fromBuffer } = require("pdf2pic");
 const vision = require("@google-cloud/vision");
 const { supabase, getEmbedding } = require("../lib/client.js");
@@ -36,7 +37,7 @@ async function extractFromPDF(fileBuffer) {
 
   if (!isTextSufficient(text)) {
     console.log("PDF looks scanned — falling back to OCR");
-    text = await extractViaOCR_PDF(fileBuffer);
+    text = await extractViaOCR(fileBuffer);
   }
   return text;
 }
