@@ -111,20 +111,21 @@ function Tutor({ user }) {
             // if (uploadError) throw uploadError;
 
             const formData = new FormData();
-    formData.append("file", file);
-    formData.append("userId", user.id);
-    formData.append("courseCode", selectedSubject);
-    formData.append("semester", docSemester);
+            formData.append("file", file);
+            formData.append("userId", user.id);
+            formData.append("courseCode", selectedSubject);
+            formData.append("semester", docSemester);
+            setUploading(true);
+            const res = await fetch(`${BACKEND_URL}/api/upload`, {
+                method: "POST",
+                body: formData, // no Content-Type header — browser sets multipart boundary automatically
+            });
 
-    const res = await fetch(`${BACKEND_URL}/api/upload`, {
-      method: "POST",
-      body: formData, // no Content-Type header — browser sets multipart boundary automatically
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Upload failed");
-    }
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || "Upload failed");
+            }
+            setUploading(false);
 
             const { document: inserted } = await res.json();
 
