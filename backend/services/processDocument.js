@@ -58,6 +58,7 @@ async function extractViaOCR(fileBuffer) {
 
   for (let page = 1; page <= numPages; page++) {
     const result = await converter(page, { responseType: "buffer" });
+    console.dir(result, { depth: null });
     const [ocrResult] = await visionClient.textDetection({
       image: { content: result.buffer },
     });
