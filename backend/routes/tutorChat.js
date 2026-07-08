@@ -1,6 +1,6 @@
 // routes/tutorChat.js
 const express = require("express");
-const { supabase, getEmbedding, groq } = require("../lib/clients.js");
+const { supabase, getEmbedding, groq } = require("../lib/client.js");
 
 const router = express.Router();
 
@@ -45,4 +45,4 @@ ${context}`;
   }
 });
 
-export default router;
+module.exports = router;

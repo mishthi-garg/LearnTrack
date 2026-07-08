@@ -1,6 +1,6 @@
 // routes/studyPlanChat.js
 const express = require("express");
-const { groq } = require("../lib/clients.js");
+const { groq } = require("../lib/client.js");
 
 const router = express.Router();
 
@@ -28,4 +28,4 @@ router.post("/study-plan-chat", async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

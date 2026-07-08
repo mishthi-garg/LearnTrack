@@ -2,7 +2,7 @@
 const pdfParse = require("pdf-parse");
 const { fromBuffer } = require("pdf2pic");
 const vision = require("@google-cloud/vision");
-const { supabase, getEmbedding } = require("../lib/clients.js");
+const { supabase, getEmbedding } = require("../lib/client.js");
 const mammoth = require("mammoth");
 
 const visionClient = new vision.ImageAnnotatorClient();
@@ -103,7 +103,7 @@ async function extractText(fileBuffer, mimeType) {
   }
 }
 
-export async function processDocument(doc, fileBuffer, mimeType) {
+async function processDocument(doc, fileBuffer, mimeType) {
   let text = "";
   let method = "unknown";
 
@@ -149,3 +149,4 @@ export async function processDocument(doc, fileBuffer, mimeType) {
     .update({ processing_status: "done", extraction_method: method })
     .eq("id", doc.id);
 }
+module.exports = { processDocument };

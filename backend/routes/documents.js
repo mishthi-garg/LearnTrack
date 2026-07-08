@@ -1,7 +1,7 @@
 // routes/documents.js
 const express = require("express");
 const multer = require("multer");
-const { supabase } = require("../lib/clients.js");
+const { supabase } = require("../lib/client.js");
 const { processDocument } = require("../services/processDocument.js");
 
 const router = express.Router();
@@ -45,4 +45,4 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
