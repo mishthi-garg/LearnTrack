@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
+const BACKEND_URL = process.env.VITE_BACKEND_URL;
+
+
 const allowedTypes = [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -100,33 +103,51 @@ function Tutor({ user }) {
         }
 
         try {
-            const filePath = `${user.id}/${selectedSubject}/${Date.now()}_${file.name}`;
-            const { data, error: uploadError } = await supabase.storage
-                .from("documents")
-                .upload(filePath, file);
+            // const filePath = `${user.id}/${selectedSubject}/${Date.now()}_${file.name}`;
+            // const { data, error: uploadError } = await supabase.storage
+            //     .from("documents")
+            //     .upload(filePath, file);
 
-            if (uploadError) throw uploadError;
+            // if (uploadError) throw uploadError;
+
+            const formData = new FormData();
+    formData.append("file", file);
+    formData.append("userId", user.id);
+    formData.append("courseCode", selectedSubject);
+    formData.append("semester", docSemester);
+
+    const res = await fetch(`${BACKEND_URL}/api/upload`, {
+      method: "POST",
+      body: formData, // no Content-Type header — browser sets multipart boundary automatically
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Upload failed");
+    }
+
+            const { document: inserted } = await res.json();
 
             const { data: signed, error: signError } = await supabase.storage
                 .from("documents")
-                .createSignedUrl(filePath, 60 * 60 * 24 * 30); // 30 days
+                .createSignedUrl(inserted.file_path, 60 * 60 * 24 * 30); // 30 days
 
             if (signError) throw signError;
 
-            const { data: inserted, error: insertError } = await supabase
-                .from("documents")
-                .insert({
-                    user_id: user.id,
-                    course_code: selectedSubject,
-                    file_name: file.name,
-                    semester: docSemester,
-                    type: file.type,
-                    file_path: filePath,
-                })
-                .select()
-                .single();
+            // const { data: inserted, error: insertError } = await supabase
+            //     .from("documents")
+            //     .insert({
+            //         user_id: user.id,
+            //         course_code: selectedSubject,
+            //         file_name: file.name,
+            //         semester: docSemester,
+            //         type: file.type,
+            //         file_path: filePath,
+            //     })
+            //     .select()
+            //     .single();
 
-            if (insertError) throw insertError;
+            // if (insertError) throw insertError;
 
             setDocuments((prev) => [
                 { ...inserted, file_url: signed?.signedUrl },
