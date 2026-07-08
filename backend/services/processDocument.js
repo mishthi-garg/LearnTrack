@@ -9,7 +9,7 @@ const mammoth = require("mammoth");
 
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
-const visionClient = new vision.ImageAnnotatorClient();
+const visionClient = new vision.ImageAnnotatorClient({ credentials });
 
 function chunkText(text, wordsPerChunk = 400) {
   const words = text.split(/\s+/).filter(Boolean);
