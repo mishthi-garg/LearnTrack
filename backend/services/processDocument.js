@@ -135,10 +135,12 @@ async function processDocument(doc, fileBuffer, mimeType) {
   const chunks = chunkText(text);
 
   for (const chunk of chunks) {
-    if (!chunk.trim()) continue;
-    const embedding = await getEmbedding(chunk);
+  if (!chunk.trim()) continue;
+  const embedding = await getEmbedding(chunk);
 
-    await supabase.from("document_chunks").insert({
+  const { error: chunkError } = await supabase
+    .from("document_chunks")
+    .insert({
       document_id: doc.id,
       user_id: doc.user_id,
       course_code: doc.course_code,
@@ -146,7 +148,11 @@ async function processDocument(doc, fileBuffer, mimeType) {
       chunk_text: chunk,
       embedding,
     });
+
+  if (chunkError) {
+    console.error(`Chunk insert failed for doc ${doc.id}:`, chunkError);
   }
+}
   await supabase
     .from("documents")
     .update({ processing_status: "done", extraction_method: method })
