@@ -16,7 +16,12 @@ function normalize(vec) {
 
 async function getEmbedding(text) {
   const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-  const result = await model.embedContent(text, { outputDimensionality: 768 });
+
+  const result = await model.embedContent({
+    content: { parts: [{ text }] },
+    outputDimensionality: 768,
+  });
+
   return normalize(result.embedding.values);
 }
 

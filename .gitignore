@@ -14,6 +14,7 @@ dist-ssr
 
 .env
 backend/decent-vertex-437712-d4-5c0d16b69357.json
+backend/test.js
 
 # Editor directories and files
 .vscode/*
