@@ -15,7 +15,7 @@ async function getPdfPageCount(fileBuffer) {
   const loadingTask = getDocument({ data: new Uint8Array(fileBuffer) });
   const pdfDoc = await loadingTask.promise;
   const count = pdfDoc.numPages;
-  await pdfDoc.destroy(); // release memory immediately
+  //await pdfDoc.destroy(); // release memory immediately
   return count;
 }
 
@@ -35,7 +35,7 @@ async function renderPdfPage(fileBuffer, pageNum, scale = 1.5) {
     await page.render({ canvasContext: context, viewport }).promise;
 
     const pngBuffer = canvas.toBuffer("image/png");
-    await pdfDoc.destroy(); // free this page's resources before returning
+    //await pdfDoc.destroy(); // free this page's resources before returning
   return pngBuffer;
 }
 module.exports = { renderPdfPage, getPdfPageCount };
