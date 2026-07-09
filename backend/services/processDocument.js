@@ -53,7 +53,7 @@ async function extractAndStoreViaOCR(doc) {
 
     let imgBuffer;
     try {
-      imgBuffer = await renderPdfPage(fileBuffer, pageNum, 2.0);
+      imgBuffer = await renderPdfPage(fileBuffer, pageNum, 3.0);
     } catch (err) {
       console.error(`Failed to render page ${pageNum}:`, err.message);
       continue;
@@ -62,7 +62,7 @@ async function extractAndStoreViaOCR(doc) {
       console.warn(`Empty image for page ${pageNum}, skipping`);
       continue;
     }
-    const [ocrResult] = await visionClient.textDetection({
+    const [ocrResult] = await visionClient.documentTextDetection({
       image: { content: imgBuffer },
     });
     const pageText = ocrResult.fullTextAnnotation?.text || "";

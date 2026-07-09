@@ -19,7 +19,7 @@ async function getPdfPageCount(fileBuffer) {
   return count;
 }
 
-async function renderPdfPage(fileBuffer, pageNum, scale = 1.5) {
+async function renderPdfPage(fileBuffer, pageNum, scale = 3.0) {
   const { getDocument } = await getPdfjs();
   const loadingTask = getDocument({ data: new Uint8Array(fileBuffer) });
   const pdfDoc = await loadingTask.promise;
