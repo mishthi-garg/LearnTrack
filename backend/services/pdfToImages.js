@@ -5,7 +5,7 @@ let pdfjsLib = null;
 async function getPdfjs() {
   if (!pdfjsLib) {
     pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = false; // no worker needed in Node
+    //pdfjsLib.GlobalWorkerOptions.workerSrc = false; // no worker needed in Node
   }
   return pdfjsLib;
 }
