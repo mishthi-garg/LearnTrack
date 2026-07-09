@@ -2,14 +2,22 @@
 const { getDocument } = require("pdfjs-dist/legacy/build/pdf.mjs");
 const { createCanvas } = require("@napi-rs/canvas");
 
-async function pdfToImageBuffers(fileBuffer) {
+async function getPdfPageCount(fileBuffer) {
   const loadingTask = getDocument({ data: new Uint8Array(fileBuffer) });
   const pdfDoc = await loadingTask.promise;
-  const buffers = [];
+  const count = pdfDoc.numPages;
+  await pdfDoc.destroy(); // release memory immediately
+  return count;
+}
 
-  for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+async function renderPdfPage(fileBuffer, pageNum, scale = 1.5) {
+  const loadingTask = getDocument({ data: new Uint8Array(fileBuffer) });
+  const pdfDoc = await loadingTask.promise;
+  
+
+  
     const page = await pdfDoc.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 2.0 }); // scale up for OCR clarity
+    const viewport = page.getViewport({ scale }); // scale up for OCR clarity
 
     const canvas = createCanvas(viewport.width, viewport.height);
     const context = canvas.getContext("2d");
@@ -17,9 +25,7 @@ async function pdfToImageBuffers(fileBuffer) {
     await page.render({ canvasContext: context, viewport }).promise;
 
     const pngBuffer = canvas.toBuffer("image/png");
-    buffers.push(pngBuffer);
-  }
-
-  return buffers;
+    await pdfDoc.destroy(); // free this page's resources before returning
+  return pngBuffer;
 }
-module.exports = { pdfToImageBuffers };
+module.exports = { renderPdfPage, getPdfPageCount };

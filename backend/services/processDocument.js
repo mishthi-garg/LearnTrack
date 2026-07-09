@@ -1,7 +1,7 @@
 // services/processDocument.js
 const pkg = require("pdf-parse");
 const pdfParse = pkg.default || pkg;
-const { pdfToImageBuffers } = require("./pdfToImages.js");
+const { getPdfPageCount, renderPdfPage } = require("./pdfToImages.js");
 const vision = require("@google-cloud/vision");
 const { supabase, getEmbedding } = require("../lib/client.js");
 const mammoth = require("mammoth");
@@ -43,23 +43,58 @@ async function extractFromPDF(fileBuffer) {
 }
 
 async function extractViaOCR(fileBuffer) {
-  const imageBuffers = await pdfToImageBuffers(fileBuffer);
+  const fileBuffer = doc._fileBuffer; // passed through, see processDocument below
+  const numPages = await getPdfPageCount(fileBuffer);
 
-  let fullText = "";
+  let anyTextFound = false;
 
-  for (const imgBuffer of imageBuffers) {
-    if (!imgBuffer || imgBuffer.length === 0) {
-      console.warn("Empty page image, skipping");
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+     console.log(`Processing page ${pageNum}/${numPages} for doc ${doc.id}`);
+
+    let imgBuffer;
+    try {
+      imgBuffer = await renderPdfPage(fileBuffer, pageNum, 2.0);
+    } catch (err) {
+      console.error(`Failed to render page ${pageNum}:`, err.message);
       continue;
     }
-console.log("Page image buffer length:", imgBuffer.length);
+    if (!imgBuffer || imgBuffer.length === 0) {
+      console.warn(`Empty image for page ${pageNum}, skipping`);
+      continue;
+    }
     const [ocrResult] = await visionClient.textDetection({
       image: { content: imgBuffer },
     });
     const pageText = ocrResult.fullTextAnnotation?.text || "";
-    fullText += pageText + "\n";
+    // free the buffer reference explicitly
+    imgBuffer = null;
+
+    if (!pageText.trim()) continue;
+    anyTextFound = true;
+
+    // chunk + embed THIS PAGE only, then discard its text too
+    const pageChunks = chunkText(pageText);
+    for (const chunk of pageChunks) {
+      if (!chunk.trim()) continue;
+      const embedding = await getEmbedding(chunk);
+
+      const { error: chunkError } = await supabase
+        .from("document_chunks")
+        .insert({
+          document_id: doc.id,
+          user_id: doc.user_id,
+          course_code: doc.course_code,
+          semester: doc.semester,
+          chunk_text: chunk,
+          embedding,
+        });
+
+      if (chunkError) {
+        console.error(`Chunk insert failed (page ${pageNum}, doc ${doc.id}):`, chunkError);
+      }
+    }
   }
-  return fullText;
+  return anyTextFound;
 }
 
 
@@ -103,32 +138,69 @@ async function extractText(fileBuffer, mimeType) {
 }
 
 async function processDocument(doc, fileBuffer, mimeType) {
-  let text = "";
-  let method = "unknown";
+  try{
+  if (mimeType === "application/pdf") {
+      // Try normal text extraction first (cheap, fast, no memory concern)
+      let text = "";
+      try {
+        const parsed = await pdfParse(fileBuffer);
+        text = parsed.text;
+      } catch (err) {
+        console.warn("pdf-parse failed:", err.message);
+      }
 
-  try {
+      if (isTextSufficient(text)) {
+        // typed PDF — chunk/embed normally, all in memory is fine since it's just text, not images
+        const chunks = chunkText(text);
+        for (const chunk of chunks) {
+          if (!chunk.trim()) continue;
+          const embedding = await getEmbedding(chunk);
+          const { error } = await supabase.from("document_chunks").insert({
+            document_id: doc.id,
+            user_id: doc.user_id,
+            course_code: doc.course_code,
+            semester: doc.semester,
+            chunk_text: chunk,
+            embedding,
+          });
+          if (error) console.error(`Chunk insert failed for doc ${doc.id}:`, error);
+        }
+        await supabase
+          .from("documents")
+          .update({ processing_status: "done", extraction_method: "pdf" })
+          .eq("id", doc.id);
+        return;
+      }
+
+      // scanned PDF — stream page-by-page instead
+      console.log("PDF looks scanned — using streaming OCR");
+      doc._fileBuffer = fileBuffer;
+      const foundText = await extractAndStoreViaOCR(doc);
+
+      await supabase
+        .from("documents")
+        .update({
+          processing_status: foundText ? "done" : "failed",
+          processing_error: foundText ? null : "No text extracted via OCR",
+          extraction_method: "image_ocr",
+        })
+        .eq("id", doc.id);
+      return;
+    }
+
+  
     const result = await extractText(fileBuffer, mimeType);
-    text = result.text;
-    method = result.method;
-  } catch (err) {
-    console.error(`Extraction failed for document ${doc.id}:`, err.message);
-    await supabase
-      .from("documents")
-      .update({ processing_status: "failed", processing_error: err.message })
-      .eq("id", doc.id);
-    return;
-  }
+     const chunks = chunkText(result.text);
+  
 
-  if (!isTextSufficient(text, 5)) {
-    console.error(`No usable text extracted for document ${doc.id}`);
+  if (!isTextSufficient(result.text, 5)) {
+    
     await supabase
       .from("documents")
       .update({ processing_status: "failed", processing_error: "No text extracted" })
       .eq("id", doc.id);
     return;
   }
-
-  const chunks = chunkText(text);
 
   for (const chunk of chunks) {
   if (!chunk.trim()) continue;
@@ -151,7 +223,15 @@ async function processDocument(doc, fileBuffer, mimeType) {
 }
   await supabase
     .from("documents")
-    .update({ processing_status: "done", extraction_method: method })
+    .update({ processing_status: "done", extraction_method: result.method })
     .eq("id", doc.id);
+
+    } catch (err) {
+    console.error(`Processing failed for doc ${doc.id}:`, err.message);
+    await supabase
+      .from("documents")
+      .update({ processing_status: "failed", processing_error: err.message })
+      .eq("id", doc.id);
+  }
 }
 module.exports = { processDocument };
