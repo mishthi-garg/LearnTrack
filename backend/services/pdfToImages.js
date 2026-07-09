@@ -1,8 +1,17 @@
 // services/pdfToImages.js
-const { getDocument } = require("pdfjs-dist/legacy/build/pdf.mjs");
 const { createCanvas } = require("@napi-rs/canvas");
 
+let pdfjsLib = null;
+async function getPdfjs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = false; // no worker needed in Node
+  }
+  return pdfjsLib;
+}
+
 async function getPdfPageCount(fileBuffer) {
+  const { getDocument } = await getPdfjs();
   const loadingTask = getDocument({ data: new Uint8Array(fileBuffer) });
   const pdfDoc = await loadingTask.promise;
   const count = pdfDoc.numPages;
