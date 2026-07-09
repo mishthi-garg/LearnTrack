@@ -42,7 +42,7 @@ async function extractFromPDF(fileBuffer) {
   return text;
 }
 
-async function extractViaOCR(doc) {
+async function extractAndStoreViaOCR(doc) {
   const fileBuffer = doc._fileBuffer; // passed through, see processDocument below
   const numPages = await getPdfPageCount(fileBuffer);
 
