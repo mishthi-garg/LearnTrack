@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { supabase } from "../supabaseClient";
 
 function ChatModal({ mode, subject, semester, userId, onClose }) {
     const [messages, setMessages] = useState(() => {
