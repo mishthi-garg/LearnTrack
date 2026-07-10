@@ -52,10 +52,13 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                     history: messages,
                 };
         try {
+            const { data: { session } } = await supabase.auth.getSession();
             //console.log(userId, subject.course_code, semester, newMessages);
             const res = await fetch(`${BACKEND_URL}${endpoint}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json",
+                    Authorization: `Bearer ${session?.access_token}`
+                 },
                 body: JSON.stringify(body),
             });
 

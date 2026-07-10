@@ -6,8 +6,17 @@ const router = express.Router();
 
 router.post("/tutor-chat", async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1];
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const { message, subjectCode, subjectName, semester, userId, history = [] } = req.body;
-    console.log("Received tutor chat request:", { message, subjectCode, subjectName, semester, userId, history });
+    const userId = user.id;
+    //console.log("Received tutor chat request:", { message, subjectCode, subjectName, semester, userId, history });
     const queryEmbedding = await getEmbedding(message);
     // crude heuristic: broad "teach me" requests get more context than narrow questions
     const isBroadRequest = /teach|explain|walk me through|go over|summarize|cover/i.test(message);
