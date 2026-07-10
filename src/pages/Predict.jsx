@@ -634,7 +634,7 @@ function Predict({ user }) {
                                                         type="text"
                                                         placeholder="Course Code"
                                                         value={gradeInput[semester]?.courseCode || ""}
-                                                        onChange={(e) => handleGradeInput(semester, "courseCode", e.target.value)}
+                                                        onChange={(e) => handleGradeInput(semester, "courseCode", e.target.value.toUpperCase().replace(/\s/g, ""))}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input

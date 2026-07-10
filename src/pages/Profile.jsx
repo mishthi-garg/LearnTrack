@@ -248,7 +248,7 @@ function Profile({ user }) {
                                 value={subject.code}
                                 onChange={
                                     (event) => {
-                                        updateSubject(index, "code", event.target.value)
+                                        updateSubject(index, "code", event.target.value.toUpperCase().replace(/\s/g, ""))
                                     }
                                 }
                                 className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"

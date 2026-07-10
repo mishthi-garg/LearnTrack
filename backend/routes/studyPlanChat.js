@@ -26,11 +26,12 @@ router.post("/study-plan-chat", async (req, res) => {
     const { message, history = [] } = req.body;
     // Pull the student's  subjects
   console.log("7. Before subjects query");
-    const { data: subjects } = await supabase
+    const { data: subjects, error: subjectsError } = await supabase
       .from("subjects")
       .select("name, credits, course_code")
       .eq("user_id", user.id);
 console.log("8. Subjects:", subjects);
+console.log("Subjects error:", subjectsError);
     const subjectList = subjects?.length
       ? subjects.map((s) => `${s.name} (${s.course_code}, ${s.credits} credits)`).join(", ")
       : "no subjects on record yet";
