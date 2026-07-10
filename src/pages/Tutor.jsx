@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
-import ChatModal from "../components/ChatModal"
+//import ChatModal from "../components/ChatModal"
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -11,6 +12,7 @@ const allowedTypes = [
     "text/markdown",
 ]; // and image/*
 function Tutor({ user }) {
+    const navigate = useNavigate();
     const [chatMode, setChatMode] = useState(null); // "subject_tutor" | "study_plan" | null
     const [documents, setDocuments] = useState([]);
     const [uploading, setUploading] = useState(false);
@@ -189,12 +191,18 @@ function Tutor({ user }) {
         }
     };
 
-    const openSubjectTutor = () => {
-        setChatMode("subject_tutor");
+    const openSubjectTutor = (sub) => {
+        console.log("sending this:", subjects.find(s => s.course_code === sub));
+         navigate(`/chat/subject_tutor`, {
+      state: {
+        subject: subjects.find(s => s.course_code === sub),
+        semester: currSemester,
+      },
+    });
     };
 
     const openStudyPlan = () => {
-        setChatMode("study_plan");
+         navigate(`/chat/study_plan`);
     };
 
     const grouped = {};
@@ -385,7 +393,7 @@ function Tutor({ user }) {
                                         setSelectedTutorSubject(
                                             selectedTutorSubject === subject.course_code ? null : subject.course_code
                                         );
-                                        openSubjectTutor();
+                                        openSubjectTutor(subject.course_code);
                                     }}
                                     className={`font-medium px-6 py-2 rounded-lg text-md transition-all duration-100 shadow-sm
                         ${selectedTutorSubject === subject.course_code ?
@@ -409,7 +417,7 @@ function Tutor({ user }) {
                     Let's Chat!
                 </button>
             </div>
-{chatMode && (
+{/* {chatMode && (
     <ChatModal 
         mode={chatMode}
         subject={subjects.find(s => s.course_code === selectedTutorSubject)}
@@ -417,7 +425,7 @@ function Tutor({ user }) {
         userId={user.id}
         onClose={() => setChatMode(null)}
     />
-)}
+)} */}
         </div>
     )
 }

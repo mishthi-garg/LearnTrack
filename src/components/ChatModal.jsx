@@ -3,15 +3,22 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 import { supabase } from "../supabaseClient";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
-function ChatModal({ mode, subject, semester, userId, onClose }) {
+function ChatModal() {
+    const { mode } = useParams(); // "subject_tutor" | "study_plan"
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { subject, semester } = location.state || {};
+  console.log(subject, semester, mode);
     const [messages, setMessages] = useState(() => {
         // Seed with an intro message immediately, no API call
         if (mode === "subject_tutor") {
             return [
                 {
                     role: "assistant",
-                    content: `Hi! I'd love to help you study ${subject.name}! 📚\n\nYou can ask me doubts about specific topics, or just say "teach me [topic]" and I'll walk you through it in detail using your uploaded notes.`,
+                    content: `Hi! I'd love to help you study ${subject?.name}! 📚\n\nYou can ask me doubts about specific topics, or just say "teach me [topic]" and I'll walk you through it in detail using your uploaded notes.`,
                 },
             ];
         }
@@ -65,7 +72,9 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                 body: JSON.stringify(body),
             });
 
+
             const data = await res.json();
+            console.log("Received response:", data);
             setMessages((prev) => [
                 ...prev,
                 { role: "assistant", content: data.reply || "Sorry, something went wrong." },
@@ -86,13 +95,18 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
             sendMessage();
         }
     };
-
+    
+const onClose = () => {
+       
+            navigate(-1);
+        
+    };
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg w-full max-w-lg h-[32rem] flex flex-col p-4">
+        // <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+             <div className="bg-white rounded-lg w-full h-[calc(100vh-112px)] flex flex-col p-4">
                 <div className="flex justify-between items-center mb-3">
                     <h3 className="text-lg font-bold text-[rgb(32,41,64)]">
-                        {mode === "subject_tutor" ? `Tutor — ${subject.name}` : "Study Planner"}
+                        {mode === "subject_tutor" ? `Tutor — ${subject?.name}` : "Study Planner"}
                     </h3>
                     <button
                         onClick={onClose}
@@ -116,14 +130,26 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                     {messages.map((m, i) => (
                         <div
                             key={i}
-                            className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${m.role === "user"
-                                ? "self-end bg-[rgb(75,86,148)] text-white"
-                                : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
+                            className={`max-w-[80%] min-w-0 px-3 py-2 rounded-lg text-sm 
+                                [&_p]:mb-4
+                                [&_ul]:my-4
+                                [&_ol]:my-4
+                                [&_li]:mb-2
+                                [&_h1]:mb-4 [&_h1]:mt-6
+                                [&_h2]:mb-3 [&_h2]:mt-5
+                                [&_h3]:mb-2 [&_h3]:mt-4
+                                [&_pre]:my-4 
+                                [&_code]:rounded [&_code]:px-2 [&_code]:bg-gray-100
+                                ${m.role === "user"
+                                    ? "self-end bg-[rgb(75,86,148)] text-white"
+                                    : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
                                 }`}
                         >
+                            <div className="overflow-x-auto"> 
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {m.content}
                             </ReactMarkdown>
+                            </div>
                         </div>
                     ))}
                     {sending && (
@@ -151,7 +177,7 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                     </button>
                 </div>
             </div>
-        </div>
+        /* </div> */
     );
 }
 

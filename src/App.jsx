@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import ChatModal from './components/ChatModal'
 import Dashboard from './pages/Dashboard'
 import Predict from './pages/Predict'
 import Profile from './pages/Profile'
@@ -237,6 +238,7 @@ function App() {
             <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
             <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />
             <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor user={user}/></ProtectedRoute>} />
+            <Route path="/chat/:mode" element={<ProtectedRoute user={user}> <ChatModal /> </ProtectedRoute>} /> 
           </Routes>
         </div>
       </div>
