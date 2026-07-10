@@ -46,7 +46,6 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                     subjectCode: subject?.course_code,
                     subjectName: subject?.name,
                     semester,
-                    userId,
                     history: messages,
                 } : {
                     message: userMsg.content,
