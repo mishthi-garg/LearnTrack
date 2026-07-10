@@ -6,26 +6,35 @@ const router = express.Router();
 
 router.post("/study-plan-chat", async (req, res) => {
   try {
+    console.log("1. Request received");
     // Verify the request actually comes from a logged-in user
     const authHeader = req.headers.authorization;
+     console.log("2. Auth header exists:", !!authHeader);
     const token = authHeader?.split(" ")[1];
+    console.log("3. Token exists:", !!token);
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+      console.log("4. Auth error:", authError);
+    console.log("5. User:", user?.id);
+
     if (authError || !user) {
+      console.log("6. Unauthorized");
       return res.status(401).json({ error: "Unauthorized" });
     }
+    
     const { message, history = [] } = req.body;
     // Pull the student's  subjects
-
+  console.log("7. Before subjects query");
     const { data: subjects } = await supabase
       .from("subjects")
       .select("name, credits, course_code")
       .eq("user_id", user.id);
-
+console.log("8. Subjects:", subjects);
     const subjectList = subjects?.length
       ? subjects.map((s) => `${s.name} (${s.course_code}, ${s.credits} credits)`).join(", ")
       : "no subjects on record yet";
-    console.log("subjects list", subjectList);
+    console.log("9. subjects list", subjectList);
     // Build a context-aware system prompt
     const systemPrompt = `You are a friendly and organized study planning assistant.
 
