@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 import { supabase } from "../supabaseClient";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function ChatModal({ mode, subject, semester, userId, onClose }) {
     const [messages, setMessages] = useState(() => {
@@ -56,9 +58,10 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
             //console.log(userId, subject.course_code, semester, newMessages);
             const res = await fetch(`${BACKEND_URL}${endpoint}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json",
+                headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${session?.access_token}`
-                 },
+                },
                 body: JSON.stringify(body),
             });
 
@@ -118,7 +121,9 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                                 : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
                                 }`}
                         >
-                            {m.content}
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {m.content}
+                            </ReactMarkdown>
                         </div>
                     ))}
                     {sending && (
