@@ -38,20 +38,25 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
 
         const endpoint =
             mode === "subject_tutor" ? "/api/tutor-chat" : "/api/study-plan-chat";
-
-        try {
-            console.log(userId, subject.course_code, semester, newMessages);
-            const res = await fetch(`${BACKEND_URL}${endpoint}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
+        const body =
+            mode === "subject_tutor"
+                ? {
                     message: userMsg.content,
-                    subjectCode: subject.course_code,
-                    subjectName: subject.name,
+                    subjectCode: subject?.course_code,
+                    subjectName: subject?.name,
                     semester,
                     userId,
                     history: messages,
-                }),
+                } : {
+                    message: userMsg.content,
+                    history: messages,
+                };
+        try {
+            //console.log(userId, subject.course_code, semester, newMessages);
+            const res = await fetch(`${BACKEND_URL}${endpoint}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
             });
 
             const data = await res.json();
@@ -106,8 +111,8 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
                         <div
                             key={i}
                             className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${m.role === "user"
-                                    ? "self-end bg-[rgb(75,86,148)] text-white"
-                                    : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
+                                ? "self-end bg-[rgb(75,86,148)] text-white"
+                                : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
                                 }`}
                         >
                             {m.content}
