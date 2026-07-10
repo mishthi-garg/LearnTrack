@@ -25,6 +25,7 @@ router.post("/study-plan-chat", async (req, res) => {
     const subjectList = subjects?.length
       ? subjects.map((s) => `${s.name} (${s.course_code}, ${s.credits} credits)`).join(", ")
       : "no subjects on record yet";
+    console.log("subjects list", subjectList);
     // Build a context-aware system prompt
     const systemPrompt = `You are a friendly and organized study planning assistant.
 
