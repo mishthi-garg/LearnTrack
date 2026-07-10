@@ -8,7 +8,7 @@ function ChatModal({ mode, subject, semester, userId, onClose }) {
             return [
                 {
                     role: "assistant",
-                    content: `Hi! I'd love to help you study ${subject}! 📚\n\nYou can ask me doubts about specific topics, or just say "teach me [topic]" and I'll walk you through it in detail using your uploaded notes.`,
+                    content: `Hi! I'd love to help you study ${subject.name}! 📚\n\nYou can ask me doubts about specific topics, or just say "teach me [topic]" and I'll walk you through it in detail using your uploaded notes.`,
                 },
             ];
         }
