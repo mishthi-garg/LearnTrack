@@ -503,7 +503,7 @@ function Predict({ user }) {
                                             <button
                                                 onClick={() => handleAddMarks(subject)}
                                                 disabled={saving === subject.course_code}
-                                                className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                className="cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                                             >
                                                 {saving === subject.course_code ? "Saving..." : "Add"}
                                             </button>
@@ -574,9 +574,9 @@ function Predict({ user }) {
                                     setNewSemester("");
                                     setNewSession("");
                                 }}
-                                className="w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                className="cursor-pointer w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                             >
-                                Click to add semester
+                                Add Semester
                             </button>
                         </div>
                         {
@@ -618,7 +618,7 @@ function Predict({ user }) {
                                                             // Remove from local state
                                                             setGrades(grades.filter((g) => g.semester !== semester));
                                                         }}
-                                                        className="text-red-400 hover:text-red-600 text-xs"
+                                                        className="cursor-pointer text-red-400 hover:text-red-600 text-xs"
                                                     >
                                                         Delete Semester
                                                     </button>
@@ -717,7 +717,7 @@ function Predict({ user }) {
                                                     <button
                                                         onClick={() => handleSaveGrade(semester, semGrades[0]?.session)}
                                                         disabled={savingGrade === semester}
-                                                        className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                        className="cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                                                     >
                                                         {savingGrade === semester ? "Saving..." : "Add"}
                                                     </button>
@@ -767,7 +767,7 @@ function Predict({ user }) {
                                 onClick={() => setSelectedSubject(
                                     selectedSubject === subject.course_code ? null : subject.course_code
                                 )}
-                                className={`font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
+                                className={`cursor-pointer font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
                         ${selectedSubject === subject.course_code ?
                                         "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
                                         : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"

@@ -110,7 +110,7 @@ const onClose = () => {
                     </h3>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-gray-800 text-xl leading-none"
+                        className="cursor-pointer text-gray-500 hover:text-gray-800 text-xl leading-none"
                     >
                         ×
                     </button>
@@ -171,7 +171,7 @@ const onClose = () => {
                     <button
                         onClick={sendMessage}
                         disabled={sending}
-                        className="bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] disabled:opacity-50"
+                        className="cursor-pointer bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] disabled:opacity-50"
                     >
                         Send
                     </button>

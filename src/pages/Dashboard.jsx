@@ -188,7 +188,7 @@ function Dashboard({ user }) {
                         />
                         <button
                             onClick={addTask}
-                            className="min-w-0 bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                            className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                         >
                             Add
                         </button>

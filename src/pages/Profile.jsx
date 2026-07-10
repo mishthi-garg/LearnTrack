@@ -258,7 +258,7 @@ function Profile({ user }) {
                         {subjects.length > 1 && (
                             <button
                                 onClick={() => removeSubject(index)}
-                                className="ml-4 text-red-600 hover:text-red-400 font-bold text-lg"
+                                className="cursor-pointer ml-4 text-red-600 hover:text-red-400 font-bold text-lg"
                             >
                                 Delete
                             </button>
@@ -287,14 +287,14 @@ function Profile({ user }) {
             <button
                 onClick={handleSave}
                 disabled={saving}
-                className="mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
+                className="cursor-pointer mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
                 {
                     saving ? "Saving..." : "SAVE"
                 }
             </button>
             <button
                 onClick={() => setShowSemesterModal(true)}
-                className="ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
+                className="cursor-pointer ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
             >
                 Udgrade Semester
             </button>
