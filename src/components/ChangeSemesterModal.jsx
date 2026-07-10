@@ -190,13 +190,29 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                                                         }))}
                                                         className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
-                                                    <input
+                                                    {/* <input
                                                         type="text"
                                                         placeholder="Final grade"
                                                         value={finalGrades[subject.course_code] || ""}
                                                         onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}
                                                         className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                    />
+                                                    /> */}
+                                                    <div className="flex items-center gap-2">
+                                                    <label for="final_grades">Final Grade:</label>
+                                                        <select name="final_grades" id="final_grades" 
+                                                    value={finalGrades[subject.course_code] || ""}
+                                                    onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}>
+                                                        <option value="" disabled hidden>Select</option>
+                                                        <option value="A">A</option>
+                                                        <option value="AB">AB</option>
+                                                        <option value="B">B</option>
+                                                        <option value="BC">BC</option>
+                                                        <option value="C">C</option>
+                                                        <option value="CD">CD</option>
+                                                        <option value="D">D</option>
+                                                        <option value="F">F</option>
+                                                    </select>
+                                                    </div>
                                                 </div>
                                             )
                                         }

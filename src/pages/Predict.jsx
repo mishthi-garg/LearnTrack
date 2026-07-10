@@ -66,12 +66,12 @@ const subjects1 = {
 function SubjectPanel({ ranges, predictedGrade }) {
     return (
         <div className="my-4 flex items-center justify-center">
-            <div className="border-2 border-[rgb(75,64,56)] bg-[rgb(238,238,238)] rounded-2xl shadow-xl p-6 overflow-x-auto">
-                <div className="flex gap-2">
+            <div className="border-2 border-[rgb(75,64,56)] bg-[rgb(238,238,238)] rounded-2xl shadow-xl px-6 py-4 w-full">
+                <div className="flex gap-4 overflow-x-auto justify-between">
                     {ranges.map((g) => (
                         <div
                             key={g.grade}
-                            className={`flex gap-4 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+                            className={`flex gap-4 flex-1 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
                                 ${predictedGrade === g.grade
                                     ? "bg-yellow-50 text-yellow-800 scale-105 shadow-md"
                                     : "bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]"
@@ -332,14 +332,16 @@ function Predict({ user }) {
 
         const newEntry = {
             user_id: user.id,
-            course_code: gradeInput.courseCode || "",
+            course_code: gradeInput[semester].courseCode || "",
             semester: semester || "",
-            grade: gradeInput.grade || "",
-            marks: parseFloat(gradeInput.marks) || "",
+            grade: gradeInput[semester].grade || "",
+            marks: parseFloat(gradeInput[semester].marks) || "",
             session: semesterSession || "",
-            subject_name: gradeInput.subjectName || "",
-            credits: parseFloat(gradeInput.credits) || "",
+            subject_name: gradeInput[semester].subjectName || "",
+            credits: parseFloat(gradeInput[semester].credits) || "",
         };
+
+        console.log("trying to save: ", newEntry);
 
         const { data, error } = await supabase
             .from("past_grades")
@@ -540,7 +542,43 @@ function Predict({ user }) {
 
             {
                 (viewMarks === "past") && (
-                    <div className="bg-white rounded-lg px-4 py-2 mt-2 max-h-90 overflow-y-auto">
+                    <div className="bg-white rounded-lg px-4 pb-2 mt-2 max-h-90 overflow-y-auto">
+                        <div className="sticky top-0 py-3 bg-white flex flex-col md:flex-row gap-3 items-center">
+                            <div className="flex gap-3 w-full justify-between">
+                                <input
+                                    type="text"
+                                    placeholder="New semester (e.g. SEM3)"
+                                    value={newSemester}
+                                    onChange={(e) => setNewSemester(formatSemester(e.target.value))}
+                                    className="flex-1 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Session"
+                                    value={newSession}
+                                    onChange={(e) => setNewSession(e.target.value)}
+                                    className="flex-1 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (newSemester.trim() === "" || newSession.trim() === "") return;
+                                    setGrades(
+                                        [...grades, {
+                                            id: "temp-" + Date.now(),
+                                            courseCode: "", subjectName: "", credits: "",
+                                            session: newSession, marks: "", grade: "",
+                                            semester: newSemester
+                                        }]
+                                    );
+                                    setNewSemester("");
+                                    setNewSession("");
+                                }}
+                                className="w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                            >
+                                Click to add semester
+                            </button>
+                        </div>
                         {
                             (() => {
                                 const grouped = {};
@@ -560,7 +598,7 @@ function Predict({ user }) {
                                     sortedSemesters.map((semester) => {
                                         const semGrades = grouped[semester];
                                         return (
-                                            <div key={semester} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
+                                            <div key={semester} className="mb-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
                                                 <div className="flex items-center justify-between">
                                                     <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
                                                     <span className="text-sm text-gray-500">Session {semGrades[0]?.session}</span>
@@ -654,13 +692,27 @@ function Predict({ user }) {
                                                         onChange={(e) => handleGradeInput(semester, "marks", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
-                                                    <input
+                                                    {/* <input
                                                         type="text"
                                                         placeholder="Grade"
                                                         value={gradeInput[semester]?.grade || ""}
                                                         onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                                                    />
+                                                    /> */}
+                                                    <label for="grades">Grade:</label>
+                                                    <select name="grades" id="grades" 
+                                                    value={gradeInput[semester]?.grade || ""}
+                                                    onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}>
+                                                        <option value="" disabled hidden>Select</option>
+                                                        <option value="A">A</option>
+                                                        <option value="AB">AB</option>
+                                                        <option value="B">B</option>
+                                                        <option value="BC">BC</option>
+                                                        <option value="C">C</option>
+                                                        <option value="CD">CD</option>
+                                                        <option value="D">D</option>
+                                                        <option value="F">F</option>
+                                                    </select>
 
                                                     <button
                                                         onClick={() => handleSaveGrade(semester, semGrades[0]?.session)}
@@ -678,40 +730,7 @@ function Predict({ user }) {
                             })()
 
                         }
-                        <div className="flex gap-3 mt-2 items-center">
-                            <input
-                                type="text"
-                                placeholder="New semester (e.g. SEM3)"
-                                value={newSemester}
-                                onChange={(e) => setNewSemester(formatSemester(e.target.value))}
-                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Session"
-                                value={newSession}
-                                onChange={(e) => setNewSession(e.target.value)}
-                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
-                            />
-                            <button
-                                onClick={() => {
-                                    if (newSemester.trim() === "" || newSession.trim() === "") return;
-                                    setGrades(
-                                        [...grades, {
-                                            id: "temp-" + Date.now(),
-                                            courseCode: "", subjectName: "", credits: "",
-                                            session: newSession, marks: "", grade: "",
-                                            semester: newSemester
-                                        }]
-                                    );
-                                    setNewSemester("");
-                                    setNewSession("");
-                                }}
-                                className="bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
-                            >
-                                Click to add semester
-                            </button>
-                        </div>
+
                     </div>
                 )
             }
@@ -765,7 +784,7 @@ function Predict({ user }) {
                         const prediction = predictions[selectedSubject];
                         const isPredicting = predicting === selectedSubject;
                         const stats = cohortStats[selectedSubject];
-                         if (!stats) return <p className="text-gray-400 text-sm mt-2">Loading...</p>;
+                        if (!stats) return <p className="text-gray-400 text-sm mt-2">Loading...</p>;
 
                         return (
                             // <SubjectPanel

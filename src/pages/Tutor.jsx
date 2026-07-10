@@ -313,7 +313,7 @@ function Tutor({ user }) {
                 {subjects.length === 0 ? (
                     <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
                 ) : (!listSemesters && (
-                    <div className="flex gap-4 my-4">
+                    <div className="flex gap-4 my-4 overflow-x-auto">
                         {subjects.map((subject) => {
                             return (
                                 <button
@@ -384,7 +384,7 @@ function Tutor({ user }) {
                 {subjects.length === 0 ? (
                     <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
                 ) : (
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex gap-4 mt-4 overflow-x-auto">
                         {subjects.map((subject) => {
                             return (
                                 <button
