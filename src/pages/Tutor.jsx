@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import ChatModal from "../components/ChatModal"
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const allowedTypes = [
     "application/pdf",
@@ -10,6 +11,7 @@ const allowedTypes = [
     "text/markdown",
 ]; // and image/*
 function Tutor({ user }) {
+    const [chatMode, setChatMode] = useState(null); // "subject_tutor" | "study_plan" | null
     const [documents, setDocuments] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -185,6 +187,14 @@ function Tutor({ user }) {
             console.error("Delete failed:", err);
             alert("Failed to delete document.");
         }
+    };
+
+    const openSubjectTutor = () => {
+        setChatMode("subject_tutor");
+    };
+
+    const openStudyPlan = () => {
+        setChatMode("study_plan");
     };
 
     const grouped = {};
@@ -371,9 +381,12 @@ function Tutor({ user }) {
                             return (
                                 <button
                                     key={subject.id}
-                                    onClick={() => setSelectedTutorSubject(
-                                        selectedTutorSubject === subject.course_code ? null : subject.course_code
-                                    )}
+                                    onClick={() => {
+                                        setSelectedTutorSubject(
+                                            selectedTutorSubject === subject.course_code ? null : subject.course_code
+                                        );
+                                        openSubjectTutor();
+                                    }}
                                     className={`font-medium px-6 py-2 rounded-lg text-md transition-all duration-100 shadow-sm
                         ${selectedTutorSubject === subject.course_code ?
                                             "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
@@ -390,11 +403,21 @@ function Tutor({ user }) {
             </div>
             <div>
                 <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Need help with study planning?</h2>
-                <button className="mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
+                <button 
+                onClick={openStudyPlan}
+                className="mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
                     Let's Chat!
                 </button>
             </div>
-
+{chatMode && (
+    <ChatModal 
+        mode={chatMode}
+        subject={subjects.find(s => s.course_code === selectedTutorSubject)}
+        semester={currSemester}
+        userId={user.id}
+        onClose={() => setChatMode(null)}
+    />
+)}
         </div>
     )
 }
