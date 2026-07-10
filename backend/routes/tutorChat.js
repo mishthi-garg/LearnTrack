@@ -14,7 +14,7 @@ router.post("/tutor-chat", async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { message, subjectCode, subjectName, semester, userId, history = [] } = req.body;
+    const { message, subjectCode, subjectName, semester, history = [] } = req.body;
     const userId = user.id;
     //console.log("Received tutor chat request:", { message, subjectCode, subjectName, semester, userId, history });
     const queryEmbedding = await getEmbedding(message);
