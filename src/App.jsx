@@ -236,7 +236,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user} /> </ProtectedRoute>} />
             <Route path="/predict" element={<ProtectedRoute user={user}><Predict user={user} /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
-            <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable /></ProtectedRoute>} />
+            <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable user={user}/></ProtectedRoute>} />
             <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor user={user}/></ProtectedRoute>} />
             <Route path="/chat/:mode" element={<ProtectedRoute user={user}> <ChatModal /> </ProtectedRoute>} /> 
           </Routes>

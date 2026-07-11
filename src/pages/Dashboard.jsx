@@ -2,9 +2,21 @@ import { ActivityCalendar } from "react-activity-calendar";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { NavLink } from "react-router-dom";
+const TABLE = "reminders";
+
+const COLORS = {
+    red: { swatch: "bg-red-300", dot: "bg-red-600", bg: "bg-red-100", border: "border-red-400", text: "text-red-700" },
+    blue: { swatch: "bg-blue-300", dot: "bg-blue-600", bg: "bg-blue-100", border: "border-blue-400", text: "text-blue-700" },
+    green: { swatch: "bg-green-300", dot: "bg-green-600", bg: "bg-green-100", border: "border-green-400", text: "text-green-700" },
+    orange: { swatch: "bg-orange-300", dot: "bg-orange-600", bg: "bg-orange-100", border: "border-orange-400", text: "text-orange-700" },
+    black: { swatch: "bg-black", dot: "bg-black", bg: "bg-gray-200", border: "border-gray-500", text: "text-gray-800" },
+    zinc: { swatch: "bg-zinc-300", dot: "bg-zinc-500", bg: "bg-zinc-100", border: "border-zinc-400", text: "text-zinc-700" },
+};
 
 function Dashboard({ user }) {
-
+    const [reminders, setReminders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [tasks, setTasks] = useState([]);
     const [taskInput, setTaskInput] = useState("");
 
@@ -12,7 +24,36 @@ function Dashboard({ user }) {
 
     const today = new Date().toISOString().split('T')[0];
 
+
+
     const [profileComplete, setProfileComplete] = useState(true);
+        useEffect(() => {
+            let cancelled = false;
+    
+            async function loadReminders() {
+                setLoading(true);
+                const { data, error } = await supabase
+                    .from(TABLE)
+                    .select("*")
+                    .eq("user_id", user.id)
+                    .eq("date", today)
+                    .order("date", { ascending: true })
+                    .order("time", { ascending: true });
+    
+                if (cancelled) return;
+    
+                if (error) {
+                    setError(error.message);
+                } else {
+                    setReminders(data);
+                }
+                setLoading(false);
+            }
+    
+            loadReminders();
+            return () => { cancelled = true; };
+        }, [user]);
+
 
     useEffect(() => {
         const checkProfile = async () => {
@@ -253,8 +294,26 @@ function Dashboard({ user }) {
 
             </div>
             <div className="rounded-lg bg-[rgba(202,170,152,0.2)] p-6 text-purple-500">
-                <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Events</h2>
-                <p className="p-4 text-gray-500">No upcoming events</p>
+                <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Today's Events</h2>
+                {/* <p className="p-4 text-gray-500">No upcoming events</p> */}
+                <div className="px-4 w-full overflow-y-auto rounded-xl mt-6 py-6 flex flex-col gap-4">
+                        {loading && <p className="text-sm text-gray-400">Loading…</p>}
+                        
+
+                        {!loading && reminders.map((r, i) => (
+                            <div key={r.id} className={i > 0 ? "pt-4" : ""}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full ${COLORS[r.color]?.dot || "bg-gray-400"}`}></span>
+                                    <p className="text-sm text-gray-500">
+                                        {new Date(r.date + "T00:00:00").toLocaleDateString("default", { weekday: "short", month: "short", day: "numeric" })}
+                                    </p>
+                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
+                                </div>
+                                <p className="mt-2 font-semibold text-[rgb(40,20,9)]">{r.title}</p>
+                                
+                            </div>
+                        ))}
+                    </div>
             </div>
 
         </div>
