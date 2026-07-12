@@ -167,17 +167,19 @@ function Timetable({ user }) {
 
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
+        <div className="flex flex-col gap-6">
+            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
             {error && (
                 <p className="text-sm text-red-600 mt-2">Error: {error}</p>
             )}
 
             {/* Header / month nav */}
-            <div className="flex flex-col md:flex-row justify-between gap-6 w-full">
-                <div className="p-6">
+            <div className="flex flex-col items-center md:flex-row justify-between gap-8 w-full">
+                <div className="flex-1 p-6 rounded-lg w-full bg-[rgba(202,170,152,0.2)]">
                     {/* list */}
-                    <div className="px-4 w-full h-138 overflow-y-auto rounded-xl mt-6 py-6 flex flex-col gap-4">
+                    <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Upcoming Events</h2>
+                
+                    <div className="px-4 w-full h-138 overflow-y-auto rounded-xl py-6 flex flex-col gap-4">
                         {loading && <p className="text-sm text-gray-400">Loading…</p>}
                         {!loading && upcoming.length === 0 && (
                             <p className="text-sm text-gray-400">No upcoming reminders. Tap a day to add one.</p>
@@ -192,14 +194,15 @@ function Timetable({ user }) {
                                     </p>
                                     {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
                                 </div>
-                                <p className="mt-2 font-semibold text-[rgb(40,20,9)]">{r.title}</p>
+                                <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
                                 
                             </div>
                         ))}
                     </div>
                 </div>
+                <div className="flex-1 min-w-0">
                 {/* Calendar grid */}
-                <div className="flex flex-col justify-center max-w-full min-w-0 pr-18">
+                <div className="flex flex-col justify-center max-w-full min-w-0">
                     <div className="flex items-center justify-center mb-4">
 
                         <div className="flex items-center gap-3">
@@ -209,7 +212,7 @@ function Timetable({ user }) {
                             >
                                 ‹
                             </button>
-                            <p className="font-medium text-[rgb(40,20,9)] w-36 text-center">{monthLabel}</p>
+                            <p className="space-mono-bold text-[rgb(40,20,9)] w-36 text-center">{monthLabel}</p>
                             <button
                                 onClick={goNextMonth}
                                 className="cursor-pointer w-6 h-6 rounded-full border border-yellow-700 text-[rgb(40,20,9)] hover:bg-yellow-50 flex items-center justify-center"
@@ -218,7 +221,7 @@ function Timetable({ user }) {
                             </button>
                         </div>
                     </div>
-                    <div className="w-2xl grid grid-cols-7 gap-2 h-fit">
+                    <div className="w-full max-w-2xl grid grid-cols-7 gap-2">
                         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                             <div key={d} className="text-center text-xs text-[rgb(75,64,56)]">{d}</div>
                         ))}
@@ -231,7 +234,7 @@ function Timetable({ user }) {
                             // Dominant tint = first reminder's color for that day (if any)
                             const dominant = dayReminders[0] ? COLORS[dayReminders[0].color] : null;
                             const cellBg = dominant ? dominant.bg : "bg-yellow-50";
-                            const cellBorder = dominant ? dominant.border : "border-none";
+                            const cellBorder = dominant ? dominant.border : "border-transparent";
 
 
                             return (
@@ -247,7 +250,7 @@ function Timetable({ user }) {
                 ${isCurrentMonth ? cellBg : "bg-[rgb(238,238,238)]"}
                 ${isToday ? "border-yellow-700 border-2" : cellBorder}
 
-                hover:border-[rgb(233,131,80)]
+                hover:border-[rgb(32,41,64)]
               `}
                                 >
                                     <span className={`text-sm sm:text-md ${isCurrentMonth ? "text-[rgb(40,20,9)]" : "text-gray-400"}`}>
@@ -266,13 +269,14 @@ function Timetable({ user }) {
                     </div>
                     
                 </div>
+                </div>
             </div>
             {/* Day detail / add modal */}
             {showModal && selectedDate && (
                 <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-xl">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-[rgb(40,20,9)]">
+                            <h3 className="text-lg space-mono-bold text-[rgb(40,20,9)]">
                                 {selectedDate.toLocaleDateString("default", { weekday: "long", month: "long", day: "numeric" })}
                             </h3>
                             <button onClick={() => setShowModal(false)} className="cursor-pointer text-gray-400 hover:text-gray-600 text-xl">
@@ -291,7 +295,7 @@ function Timetable({ user }) {
                                         </div>
                                         <button
                                             onClick={() => deleteReminder(selectedKey, r.id)}
-                                            className="cursor-pointer text-gray-400 hover:text-[rgb(193,102,107)] text-sm"
+                                            className="exo cursor-pointer text-gray-400 hover:text-[rgb(193,102,107)] text-sm"
                                         >
                                             Remove
                                         </button>
@@ -342,8 +346,8 @@ function Timetable({ user }) {
 
                             <button
                                 onClick={saveReminder}
-                                className="cursor-pointer bg-[rgb(40,20,9)] text-white rounded-lg py-2 text-sm font-medium hover:bg-[rgb(60,35,20)]"
-                            >
+                                className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                        >
                                 Save reminder
                             </button>
                         </div>

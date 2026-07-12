@@ -199,13 +199,13 @@ function Dashboard({ user }) {
     console.log(buildActivityData());
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
+            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Dashboard</h1>
 
             {
                 !profileComplete && (
                     <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex items-center justify-between">
-                        <p className="text-yellow-800 text-sm">Complete your profile to get the most out of LearnTrack.</p>
-                        <NavLink to="/profile" className="text-sm font-bold text-[rgb(75,86,148)] hover:underline">
+                        <p className="englebert-regular text-yellow-800 text-lg">Seems like your profile is incomplete! Please complete your profile to get the most out of LearnTrack.</p>
+                        <NavLink to="/profile" className="exo text-sm font-bold text-[rgb(75,86,148)] hover:underline">
                             Click to Complete Profile
                         </NavLink>
                     </div>
@@ -216,7 +216,7 @@ function Dashboard({ user }) {
             <div className="flex gap-6">
 
                 <div className="p-4 rounded-lg bg-[rgb(202,170,152,0.2)] basis-1/3 max-h-64 overflow-y-auto">
-                    <h2 className="text-xl text-[rgb(75,64,56)] font-bold">To-Do List</h2>
+                    <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">To-Do List</h2>
 
                     <div className="py-2 flex gap-3">
                         <input
@@ -229,7 +229,7 @@ function Dashboard({ user }) {
                         />
                         <button
                             onClick={addTask}
-                            className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                            className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                         >
                             Add
                         </button>
@@ -253,7 +253,7 @@ function Dashboard({ user }) {
 
                                     <button
                                         onClick={() => deleteTask(task.id)}
-                                        className="min-w-0 text-red-500 hover:text-red-700"
+                                        className="exo min-w-0 text-red-500 hover:text-red-700"
                                     >
                                         Delete
                                     </button>
@@ -264,7 +264,7 @@ function Dashboard({ user }) {
                 </div>
                 <div className="basis-2/3 bg-[rgb(202,170,152,0.2)] p-6 flex-1 overflow-x-auto rounded-lg">
 
-                    <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Activity</h2>
+                    <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Activity</h2>
                     <ActivityCalendar
                         data={buildActivityData()}
                         colorScheme="light"
@@ -293,12 +293,14 @@ function Dashboard({ user }) {
                 </div>
 
             </div>
-            <div className="rounded-lg bg-[rgba(202,170,152,0.2)] p-6 text-purple-500">
-                <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Today's Events</h2>
+            <div className="rounded-lg bg-[rgba(202,170,152,0.2)] p-6">
+                <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Today's Events</h2>
                 {/* <p className="p-4 text-gray-500">No upcoming events</p> */}
                 <div className="px-4 w-full overflow-y-auto rounded-xl mt-6 py-6 flex flex-col gap-4">
                         {loading && <p className="text-sm text-gray-400">Loading…</p>}
-                        
+                        {!loading && reminders.length === 0 && (
+                            <p className="text-gray-500">No events today!</p>
+                        )}
 
                         {!loading && reminders.map((r, i) => (
                             <div key={r.id} className={i > 0 ? "pt-4" : ""}>
@@ -309,7 +311,7 @@ function Dashboard({ user }) {
                                     </p>
                                     {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
                                 </div>
-                                <p className="mt-2 font-semibold text-[rgb(40,20,9)]">{r.title}</p>
+                                <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
                                 
                             </div>
                         ))}

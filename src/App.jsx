@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { VscAccount } from "react-icons/vsc";
 import ChatModal from './components/ChatModal'
 import Dashboard from './pages/Dashboard'
 import Predict from './pages/Predict'
@@ -75,15 +76,15 @@ function App() {
             <div className="bg-[rgb(32,41,64)] shadow-sm px-6 py-4 relative flex items-center justify-between">
               <NavLink
                 to="/"
-                className="text-xl font-bold text-[rgb(255,222,66)]">
+                className="yuyu-regular text-4xl font-bold text-[rgb(255,222,66)]">
                 LearnTrack
               </NavLink>
 
-              <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-6">
+              <nav className="exo-2 hidden md:flex absolute left-1/2 -translate-x-1/2 gap-6">
                 <NavLink
                   to="/"
                   className={({ isActive }) =>
-                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
+                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] hover:text-[rgb(255,222,66)]"
                   }
                 >
                   Dashboard
@@ -92,7 +93,7 @@ function App() {
                 <NavLink
                   to="/timetable"
                   className={({ isActive }) =>
-                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
+                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] hover:text-[rgb(255,222,66)]"
                   }
                 >
                   Timetable
@@ -101,7 +102,7 @@ function App() {
                 <NavLink
                   to="/tutor"
                   className={({ isActive }) =>
-                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
+                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] hover:text-[rgb(255,222,66)]"
                   }
                 >
                   Tutor
@@ -110,7 +111,7 @@ function App() {
                 <NavLink
                   to="/predict"
                   className={({ isActive }) =>
-                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
+                    isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] hover:text-[rgb(255,222,66)]"
                   }
                 >
                   Predict
@@ -126,10 +127,10 @@ function App() {
                   <NavLink
                     to="/profile"
                     className={({ isActive }) =>
-                      isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)]"
+                      isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] text-2xl"
                     }
                   >
-                    PROFILE
+                    <VscAccount />
                   </NavLink>
                   {
                     isHovered && (
@@ -139,14 +140,14 @@ function App() {
                         <p>{user.email}</p>
                         <NavLink
                           to="/profile"
-                          className="text-sm w-full hover:underline"
+                          className="exo text-sm w-full hover:underline"
                         >
                           Edit Profile
                         </NavLink>
                         <button
                           onClick={handleLogout}
                           disabled={logoutLoading}
-                          className="disabled:opacity-50 cursor-pointer w-full text-sm bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                          className="sniglet-regular disabled:opacity-50 cursor-pointer w-full text-sm bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                         >
                           {
                             logoutLoading ? 'Logging Out...' : 'Logout'

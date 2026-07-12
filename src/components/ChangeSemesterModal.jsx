@@ -137,7 +137,7 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className="bg-[rgb(238,238,238)] rounded-2xl shadow-xl p-6 w-full maw-w-lg mx-4 max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-[rgb(32,41,64)]">
+                    <h2 className="text-xl space-mono-bold text-[rgb(40,20,9)]">
                         Enter Final Grades
                     </h2>
                     <button
@@ -151,7 +151,7 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                     If any subjects already saved in Past Grades will be saved automatically.
                 </p>
                 <div className="mb-4">
-                    <label className="text-md text-gray-600 font-bold">Session:</label>
+                    <label className="text-md font-bold">Session:</label>
                     <input
                         type="text"
                         value={session}

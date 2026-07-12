@@ -14,7 +14,7 @@ function Profile({ user }) {
     const [message, setMessage] = useState("");
 
     const [showSemesterModal, setShowSemesterModal] = useState(false);
-    
+
     useEffect(() => {
         if (!user) return;
 
@@ -112,12 +112,12 @@ function Profile({ user }) {
     };
 
     const handleSemesterComplete = async () => {
-        const nextSemNumber = (parseInt(semester.replace(/\D/g,"")) || 0) + 1;
+        const nextSemNumber = (parseInt(semester.replace(/\D/g, "")) || 0) + 1;
         const nextSemester = `SEM${nextSemNumber}`;
 
         await supabase
             .from("profiles")
-            .update({semester: nextSemester})
+            .update({ semester: nextSemester })
             .eq("id", user.id);
         setSubjects([{ name: "", credits: "", code: "" }]);
         setSemester(nextSemester);
@@ -126,9 +126,9 @@ function Profile({ user }) {
     }
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Edit Profile</h1>
-            <div className="flex flex-col gap-4 mt-6">
+        <div className="flex flex-col gap-6">
+            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Profile</h1>
+            <div className="flex flex-col gap-4">
                 <div className="flex items-center">
                     <label className="text-lg font-medium">Name:</label>
                     <input
@@ -283,32 +283,33 @@ function Profile({ user }) {
                     </p>
                 )
             }
-
-            <button
-                onClick={handleSave}
-                disabled={saving}
-                className="cursor-pointer mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
-                {
-                    saving ? "Saving..." : "SAVE"
-                }
-            </button>
-            <button
-                onClick={() => setShowSemesterModal(true)}
-                className="cursor-pointer ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
-            >
-                Udgrade Semester
-            </button>
+            <div>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="sniglet-regular cursor-pointer mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
+                    {
+                        saving ? "Saving..." : "Save"
+                    }
+                </button>
+                <button
+                    onClick={() => setShowSemesterModal(true)}
+                    className="sniglet-regular cursor-pointer ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
+                >
+                    Udgrade Semester
+                </button>
+            </div>
             {
                 showSemesterModal && (
-                    <ChangeSemesterModal 
-                        user = {user}
+                    <ChangeSemesterModal
+                        user={user}
                         currentSemester={semester}
-                        subjects={subjects.map((s)=>({
+                        subjects={subjects.map((s) => ({
                             name: s.name,
                             credits: s.credits,
                             course_code: s.code
                         }))}
-                        onClose={()=> setShowSemesterModal(false)}
+                        onClose={() => setShowSemesterModal(false)}
                         onComplete={handleSemesterComplete}
                     />
                 )

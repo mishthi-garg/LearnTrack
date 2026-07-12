@@ -33,7 +33,7 @@ export default function AuthPage(){
     return(
         <div className="min-h-screen bg-[rgb(234,224,207)] flex items-center justify-center" >
             <div className="bg-[rgb(238,238,238)] rounded-2xl shadow-lg p-8 w-full max-w-md">
-                <h1 className="text-2xl bg-[rgb(32,41,64)] font-bold text-[rgb(255,222,66)] mb-2 p-4 rounded-4xl flex items-center justify-center">LearnTrack</h1>
+                <h1 className="text-4xl bg-[rgb(32,41,64)] font-bold yuyu-regular text-[rgb(255,222,66)] mb-2 p-4 rounded-4xl flex items-center justify-center">LearnTrack</h1>
                 <p className="flex items-center justify-center text-sm text-[rgb(75,64,56)] mb-2 mt-4">
                     {
                         isLogin ? 'Welcome back! Sign in to continue.'
@@ -66,7 +66,7 @@ export default function AuthPage(){
                 <button
                     onClick = {handleSubmit}
                     disabled = {loading}
-                    className="w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 mt-4 rounded-lg hover:bg-[rgb(32,41,64)] disabled:opacity-50"
+                    className="sniglet-regular w-full cursor-pointer bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 mt-4 rounded-lg hover:bg-[rgb(32,41,64)] disabled:opacity-50"
                     >
                         {
                             loading? 'Please wait...'

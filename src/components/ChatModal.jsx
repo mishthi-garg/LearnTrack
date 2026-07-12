@@ -103,9 +103,9 @@ const onClose = () => {
     };
     return (
         // <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-             <div className="bg-white rounded-lg w-full h-[calc(100vh-112px)] flex flex-col p-4">
-                <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-lg font-bold text-[rgb(32,41,64)]">
+             <div className="bg-white rounded-lg w-full h-[calc(100vh-112px)] flex flex-col gap-6 p-4">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg space-mono-bold text-[rgb(40,20,9)]">
                         {mode === "subject_tutor" ? `Tutor — ${subject?.name}` : "Study Planner"}
                     </h3>
                     <button
@@ -118,7 +118,7 @@ const onClose = () => {
 
                 <div
                     ref={scrollRef}
-                    className="flex-1 overflow-y-auto flex flex-col gap-2 mb-3 px-1"
+                    className="flex-1 overflow-y-auto flex flex-col gap-2 px-1"
                 >
                     {messages.length === 0 && (
                         <p className="text-gray-400 text-sm">
@@ -171,8 +171,8 @@ const onClose = () => {
                     <button
                         onClick={sendMessage}
                         disabled={sending}
-                        className="cursor-pointer bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] disabled:opacity-50"
-                    >
+                        className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                        >
                         Send
                     </button>
                 </div>

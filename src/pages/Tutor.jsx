@@ -218,17 +218,17 @@ function Tutor({ user }) {
     });
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Tutor</h1>
-            <div className="my-4 rounded-lg p-4 bg-[rgb(202,170,152,0.2)] max-h-72 overflow-y-auto">
+        <div className="flex flex-col gap-6">
+            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Tutor</h1>
+            <div className="rounded-lg p-4 bg-[rgb(202,170,152,0.2)] max-h-72 overflow-y-auto">
 
                 <div className="py-2 flex gap-3 items-center justify-between">
-                    <h2 className="text-xl text-[rgb(75,64,56)] font-bold">Reference Notes</h2>
+                    <h2 className="text-xl space-mono-bold text-[rgb(75,64,56)]">Reference Notes</h2>
 
                     <button
                         onClick={handleAddClick}
                         disabled={uploading || !selectedSubject}
-                        className="disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                        className="disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white text-sm font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                     >
                         {uploading ? "Uploading..." : "Upload"}
                     </button>
@@ -369,7 +369,7 @@ function Tutor({ user }) {
             </div>
 
             <div>
-                <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Choose a Subject to Study</h2>
+                <h2 className="space-mono-bold text-xl text-[rgb(75,64,56)] mt-6">Choose a Subject to Study</h2>
                 {/* <div className="flex gap-4 mt-4">
                     <button className="bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
                         Data Structures
@@ -395,7 +395,7 @@ function Tutor({ user }) {
                                         );
                                         openSubjectTutor(subject.course_code);
                                     }}
-                                    className={`font-medium px-6 py-2 rounded-lg text-md transition-all duration-100 shadow-sm
+                                    className={`sniglet-regular cursor-pointer font-medium px-6 py-2 rounded-lg text-lg transition-all duration-100 shadow-sm
                         ${selectedTutorSubject === subject.course_code ?
                                             "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
                                             : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"
@@ -410,10 +410,10 @@ function Tutor({ user }) {
 
             </div>
             <div>
-                <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Need help with study planning?</h2>
+                <h2 className="text-xl space-mono-bold text-[rgb(75,64,56)] mt-6">Need help with study planning?</h2>
                 <button 
                 onClick={openStudyPlan}
-                className="mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
+                className="sniglet-regular mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
                     Let's Chat!
                 </button>
             </div>

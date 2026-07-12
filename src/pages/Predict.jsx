@@ -71,7 +71,7 @@ function SubjectPanel({ ranges, predictedGrade }) {
                     {ranges.map((g) => (
                         <div
                             key={g.grade}
-                            className={`flex gap-4 flex-1 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+                            className={`fraunces flex gap-4 flex-1 items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
                                 ${predictedGrade === g.grade
                                     ? "bg-yellow-50 text-yellow-800 scale-105 shadow-md"
                                     : "bg-[rgb(202,170,152,0.2)] text-[rgb(75,64,56)]"
@@ -392,12 +392,12 @@ function Predict({ user }) {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-[rgb(32,41,64)]">Predict</h1>
-            <div className="italic bg-yellow-50 border border-yellow-300 my-4 p-4 rounded-lg text-yellow-800">
+            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Predict</h1>
+            <div className="englebert-regular text-lg bg-yellow-50 border border-yellow-300 my-4 p-4 rounded-lg text-yellow-800">
                 Since the grades are relative, predictions will be based using a placeholder mean and standard deviation until 30+ students join the platform and provide marks for the same course.
             </div>
             <div className="flex gap-4 mt-4">
-                <button className={`text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
+                <button className={`sniglet-regular text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
                     ${viewMarks === "current" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
                     }`}
                     onClick={() => {
@@ -406,7 +406,7 @@ function Predict({ user }) {
                 >
                     Current Marks Till Now
                 </button>
-                <button className={`text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
+                <button className={`sniglet-regular text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer
                     ${viewMarks === "past" ? "bg-[rgb(32,41,64)]" : "bg-[rgb(75,86,148)]"
                     }`}
                     onClick={() => {
@@ -427,9 +427,33 @@ function Predict({ user }) {
                             ) : (
                                 subjects.map((subject) => (
                                     <div key={subject.id} className="my-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
+                                        
                                         <div className="flex items-center gap-3">
-                                            <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{subject.name}</h2>
+                                            <h2 className="space-mono-bold text-lg text-[rgb(32,41,64)]">{subject.name}</h2>
                                             <span className="text-sm text-gray-500">{subject.course_code} | {subject.credits} credits</span>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                                            <button
+                                                onClick={() => handlePredict(subject)}
+                                                disabled={predicting === subject.course_code || !marks[subject.course_code]?.length}
+                                                className="sniglet-regular text-[rgb(32,41,64)] cursor-pointer border transition duration-200 disabled:opacity-50 hover:text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                            >
+                                                {predicting === subject.course_code ? "Predicting..." : "Predict Grade"}
+                                            </button>
+
+                                            {predictions[subject.course_code] && (
+                                                <div className="fraunces bg-yellow-50 rounded-full px-4 flex items-center gap-3">
+                                                    <span className="font-bold text-lg text-[rgb(32,41,64)]">
+                                                        {predictions[subject.course_code].predicted_grade}
+                                                    </span>
+                                                    <span className="text-sm text-gray-500">
+                                                        {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        z-score [ {predictions[subject.course_code].overall_z} ]
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {
@@ -455,7 +479,7 @@ function Predict({ user }) {
                                                                     <td className="py-2">
                                                                         <button
                                                                             onClick={() => handleDeleteMark(m.id, subject.course_code)}
-                                                                            className="text-red-400 hover:text-red-600 text-xs"
+                                                                            className="exo text-red-400 hover:text-red-600 text-xs"
                                                                         >
                                                                             Delete
                                                                         </button>
@@ -503,34 +527,12 @@ function Predict({ user }) {
                                             <button
                                                 onClick={() => handleAddMarks(subject)}
                                                 disabled={saving === subject.course_code}
-                                                className="cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                className="sniglet-regular cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                                             >
                                                 {saving === subject.course_code ? "Saving..." : "Add"}
                                             </button>
                                         </div>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <button
-                                                onClick={() => handlePredict(subject)}
-                                                disabled={predicting === subject.course_code || !marks[subject.course_code]?.length}
-                                                className="text-[rgb(32,41,64)] cursor-pointer border transition duration-200 disabled:opacity-50 hover:text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
-                                            >
-                                                {predicting === subject.course_code ? "Predicting..." : "Predict Grade"}
-                                            </button>
-
-                                            {predictions[subject.course_code] && (
-                                                <div className="bg-yellow-50 rounded-full px-4 flex items-center gap-3">
-                                                    <span className="font-bold text-xl text-[rgb(32,41,64)]">
-                                                        {predictions[subject.course_code].predicted_grade}
-                                                    </span>
-                                                    <span className="text-sm text-gray-500">
-                                                        {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
-                                                    </span>
-                                                    <span className="text-xs text-gray-400">
-                                                        z-score [ {predictions[subject.course_code].overall_z} ]
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
+                                        
                                     </div>
                                 ))
                             )
@@ -574,7 +576,7 @@ function Predict({ user }) {
                                     setNewSemester("");
                                     setNewSession("");
                                 }}
-                                className="cursor-pointer w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                className="sniglet-regular cursor-pointer w-full bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                             >
                                 Add Semester
                             </button>
@@ -647,7 +649,7 @@ function Predict({ user }) {
                                                                     <td className="py-2">
                                                                         <button
                                                                             onClick={() => removeGrade(g.id)}
-                                                                            className="text-red-400 hover:text-red-600 text-xs"
+                                                                            className="exo text-red-400 hover:text-red-600 text-xs"
                                                                         >
                                                                             Delete
                                                                         </button>
@@ -717,7 +719,7 @@ function Predict({ user }) {
                                                     <button
                                                         onClick={() => handleSaveGrade(semester, semGrades[0]?.session)}
                                                         disabled={savingGrade === semester}
-                                                        className="cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                                                        className="sniglet-regular cursor-pointer bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                                                     >
                                                         {savingGrade === semester ? "Saving..." : "Add"}
                                                     </button>
@@ -736,7 +738,7 @@ function Predict({ user }) {
             }
 
             <div>
-                <h2 className="text-xl text-[rgb(75,64,56)] font-bold mt-6">Current Predictions</h2>
+                <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold mt-6">Current Predictions</h2>
                 <p className="text-[rgb(75,64,56)] my-1">Select a subject to view predicted grades.</p>
 
                 {/* <div className="flex gap-4 overflow-x-auto my-2">
@@ -767,7 +769,7 @@ function Predict({ user }) {
                                 onClick={() => setSelectedSubject(
                                     selectedSubject === subject.course_code ? null : subject.course_code
                                 )}
-                                className={`cursor-pointer font-bold px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
+                                className={`sniglet-regular cursor-pointer font-medium px-6 py-2 rounded-xl text-lg transition-all duration-100 shadow-sm
                         ${selectedSubject === subject.course_code ?
                                         "bg-[rgb(75,64,56)] text-[rgb(238,238,238)] shadow-md"
                                         : "bg-[rgb(238,238,238)] border-2 border-[rgb(154,134,120)] hover:border-[rgb(75,64,56)] text-[rgb(75,64,56)] hover:bg-[rgb(75,64,56,0.2)] hover:shadow-md"
