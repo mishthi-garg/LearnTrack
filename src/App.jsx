@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { VscAccount } from "react-icons/vsc";
+import Lanyard from './Lanyard'
 import ChatModal from './components/ChatModal'
 import Dashboard from './pages/Dashboard'
 import Predict from './pages/Predict'
@@ -121,8 +122,8 @@ function App() {
               <div className="hidden md:flex items-center gap-4">
                 <div
                   className="relative"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 >
                   <NavLink
                     to="/profile"
@@ -133,30 +134,16 @@ function App() {
                     <VscAccount />
                   </NavLink>
                   {
-                    isHovered && (
-                      <div className="absolute flex flex-col gap-2 right-0 top-6 bg-[rgb(238,238,238)] border border-[rgb(75,64,56)] rounded-xl shadow-lg py-2 px-6 min-w-max items-start">
-                        <p className="font-bold">{profileName || ""}</p>
-
-                        <p>{user.email}</p>
-                        <NavLink
-                          to="/profile"
-                          className="exo text-sm w-full hover:underline"
-                        >
-                          Edit Profile
-                        </NavLink>
-                        <button
-                          onClick={handleLogout}
-                          disabled={logoutLoading}
-                          className="sniglet-regular disabled:opacity-50 cursor-pointer w-full text-sm bg-[rgb(75,86,148)] text-white font-bold px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
-                        >
-                          {
-                            logoutLoading ? 'Logging Out...' : 'Logout'
-
-                          }
-                        </button>
-                      </div>
-                    )
-                  }
+  isHovered && (
+    <div className="fixed right-0 top-0 w-80 h-screen pointer-events-none z-40">
+      <Lanyard
+        position={[0, 0, 20]}
+        gravity={[0, -40, 0]}
+        frontText={"hello"}
+      />
+    </div>
+  )
+}
                 </div>
 
               </div>
@@ -237,9 +224,9 @@ function App() {
             <Route path="/" element={<ProtectedRoute user={user}> <Dashboard user={user} /> </ProtectedRoute>} />
             <Route path="/predict" element={<ProtectedRoute user={user}><Predict user={user} /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute user={user}><Profile user={user} /></ProtectedRoute>} />
-            <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable user={user}/></ProtectedRoute>} />
-            <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor user={user}/></ProtectedRoute>} />
-            <Route path="/chat/:mode" element={<ProtectedRoute user={user}> <ChatModal /> </ProtectedRoute>} /> 
+            <Route path="/timetable" element={<ProtectedRoute user={user}><Timetable user={user} /></ProtectedRoute>} />
+            <Route path="/tutor" element={<ProtectedRoute user={user}><Tutor user={user} /></ProtectedRoute>} />
+            <Route path="/chat/:mode" element={<ProtectedRoute user={user}> <ChatModal /> </ProtectedRoute>} />
           </Routes>
         </div>
       </div>
