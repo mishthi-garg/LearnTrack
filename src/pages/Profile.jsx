@@ -258,7 +258,7 @@ function Profile({ user }) {
                         {subjects.length > 1 && (
                             <button
                                 onClick={() => removeSubject(index)}
-                                className="cursor-pointer ml-4 text-red-600 hover:text-red-400 font-bold text-lg"
+                                className="exo cursor-pointer ml-4 text-red-600 hover:text-red-400 text-lg"
                             >
                                 Delete
                             </button>

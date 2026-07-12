@@ -19,7 +19,7 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 // const BLANK_PIXEL =
 //     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 const BLANK_PIXEL =
-  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+    "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 // The card model's front face is UV-mapped to the LEFT half of the texture
 // atlas and the back face to the RIGHT half (measured from card.glb). Each
 // custom image is composited into its own half so the two faces render
@@ -33,7 +33,9 @@ export default function Lanyard({
     fov = 20,
     transparent = true,
     frontImage = null,
-    frontText = null,
+    headText = null,
+    nameText = null,
+    mailText = null,
     backImage = null,
     imageFit = 'cover',
     lanyardImage = null,
@@ -60,7 +62,9 @@ export default function Lanyard({
                     <Band
                         isMobile={isMobile}
                         frontImage={frontImage}
-                        frontText={frontText} 
+                        headText={headText}
+                        nameText={nameText}
+                        mailText={mailText}
                         backImage={backImage}
                         imageFit={imageFit}
                         lanyardImage={lanyardImage}
@@ -106,7 +110,9 @@ function Band({
     minSpeed = 0,
     isMobile = false,
     frontImage = null,
-    frontText = null,
+    headText = null,
+    nameText = null,
+    mailText = null,
     backImage = null,
     imageFit = 'cover',
     lanyardImage = null,
@@ -133,32 +139,32 @@ function Band({
     // Composite the front/back images into the card's texture atlas (front = left
     // half, back = right half). Each image is drawn aspect-preserving (no stretch).
     const cardMap = useMemo(() => {
-    const baseMap = materials.base.map;
-    const baseImg = baseMap.image;
-    const W = baseImg.width;
-    const H = baseImg.height;
-    const canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return baseMap;
+        const baseMap = materials.base.map;
+        const baseImg = baseMap.image;
+        const W = baseImg.width;
+        const H = baseImg.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return baseMap;
 
-    // Fill with a plain background instead of the baked-in art
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
+        // Fill with a plain background instead of the baked-in art
+        ctx.fillStyle = '#1f2940';
+        ctx.fillRect(0, 0, W, H);
 
-    const drawFitted = (img, rect) => { /* unchanged */ };
+        const drawFitted = (img, rect) => { /* unchanged */ };
 
-    if (frontImage && frontTex.image) drawFitted(frontTex.image, FRONT_UV_RECT);
-    if (backImage && backTex.image) drawFitted(backTex.image, BACK_UV_RECT);
+        if (frontImage && frontTex.image) drawFitted(frontTex.image, FRONT_UV_RECT);
+        if (backImage && backTex.image) drawFitted(backTex.image, BACK_UV_RECT);
 
-    const composite = new THREE.CanvasTexture(canvas);
-    composite.colorSpace = THREE.SRGBColorSpace;
-    composite.flipY = baseMap.flipY;
-    composite.anisotropy = 16;
-    composite.needsUpdate = true;
-    return composite;
-}, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
+        const composite = new THREE.CanvasTexture(canvas);
+        composite.colorSpace = THREE.SRGBColorSpace;
+        composite.flipY = baseMap.flipY;
+        composite.anisotropy = 16;
+        composite.needsUpdate = true;
+        return composite;
+    }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
     // const cardMap = useMemo(() => {
     //     const baseMap = materials.base.map;
     //     if (!frontImage && !backImage) return baseMap;
@@ -255,7 +261,7 @@ function Band({
 
     curve.curveType = 'chordal';
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
+    const truncate = (str, max) => (str && str.length > max ? str.slice(0, max - 1) + '…' : str);
     return (
         <>
             <group position={[0, 4, 0]}>
@@ -294,19 +300,49 @@ function Band({
                         </mesh>
                         <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
                         <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
-                        {frontText && (
-                <Text
-                    position={[0, 0.3, 0.02]}   // nudge slightly in front of the card surface
-                    fontSize={0.15}
-                    color="black"
-                    anchorX="center"
-                    anchorY="middle"
-                    maxWidth={0.7}
-                    textAlign="center"
-                >
-                    {frontText}
-                </Text>
-            )}
+                        {headText && (
+                            <Text
+                                position={[0, 0.75, 0.02]}   // nudge slightly in front of the card surface
+                                fontSize={0.18}
+                                font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/yuyu/Yuyu-Regular.ttf"
+                                color="rgb(255,222,66)"
+                                anchorX="center"
+                                anchorY="middle"
+                                maxWidth={0.6}
+                                textAlign="center"
+                                overflowWrap="break-word"
+                            >
+                                {headText}
+                            </Text>
+                        )}
+                        {nameText && (
+                            <Text
+                                position={[0, 0.45, 0.02]}   // nudge slightly in front of the card surface
+                                fontSize={0.09}
+                                color="#eeeeee"
+                                anchorX="center"
+                                anchorY="middle"
+                                maxWidth={0.6}
+                                textAlign="center"
+                                overflowWrap="break-word"
+                            >
+                                {truncate(nameText, 12)}
+                            </Text>
+                        )}
+                        {mailText && (
+                            <Text
+                                position={[0, 0.25, 0.02]}   // nudge slightly in front of the card surface
+                                fontSize={0.07}
+                                color="#dddddd"
+                                anchorX="center"
+                                anchorY="middle"
+                                maxWidth={0.6}
+                                textAlign="center"
+                                overflowWrap="break-word"
+                            >
+                                {truncate(mailText, 24)}
+                            </Text>
+                        )}
                     </group>
                 </RigidBody>
             </group>

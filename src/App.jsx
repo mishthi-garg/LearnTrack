@@ -122,28 +122,30 @@ function App() {
               <div className="hidden md:flex items-center gap-4">
                 <div
                   className="relative"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
                 >
                   <NavLink
                     to="/profile"
                     className={({ isActive }) =>
-                      isActive ? "font-semibold text-[rgb(238,238,238)]" : "text-[rgb(221,221,221)] text-2xl"
+                      isActive ? "font-semibold text-[rgb(238,238,238)] text-2xl" : "text-[rgb(221,221,221)] text-2xl"
                     }
                   >
                     <VscAccount />
                   </NavLink>
                   {
-  isHovered && (
-    <div className="fixed right-0 top-0 w-80 h-screen pointer-events-none z-40">
-      <Lanyard
-        position={[0, 0, 20]}
-        gravity={[0, -40, 0]}
-        frontText={"hello"}
-      />
-    </div>
-  )
-}
+                    isHovered && (
+                      <div className="hidden md:block fixed right-0 top-18 w-78 h-screen pointer-events-none z-40">
+                        <Lanyard
+                          position={[0, 0, 20]}
+                          gravity={[0, -40, 0]}
+                          headText = "LearnTrack"
+                          nameText={`${profileName || ""}`}
+                          mailText={`${user.email}`}
+                        />
+                      </div>
+                    )
+                  }
                 </div>
 
               </div>
