@@ -3,6 +3,8 @@ import { supabase } from "../supabaseClient";
 import ChangeSemesterModal from "../components/ChangeSemesterModal"
 
 function Profile({ user }) {
+    const [logoutLoading, setLogoutLoading] = useState(false);
+
     const [name, setName] = useState("");
     const [roll, setRoll] = useState("");
     const [branch, setBranch] = useState("");
@@ -49,6 +51,10 @@ function Profile({ user }) {
         fetchSubjects();
     }, [user]);
 
+    const handleLogout = async () => {
+        setLogoutLoading(true);
+        await supabase.auth.signOut();
+    }
 
     const addSubject = () => {
         setSubjects([...subjects, { name: "", credits: "", code: "" }]);
@@ -128,152 +134,164 @@ function Profile({ user }) {
     return (
         <div className="flex flex-col gap-6">
             <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Profile</h1>
-            <div className="flex flex-col gap-4">
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">Name:</label>
-                    <input
-                        value={name}
-                        type="text"
-                        onChange={
-                            (event) => {
-                                setName(event.target.value)
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your name"
-                    />
-                </div>
+            <div className="flex flex-col md:flex-row gap-4">
+                {/* info */}
+                <div className="bg-[rgb(202,170,152,0.2)] p-4 rounded-lg flex flex-col gap-4">
+                    <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Personal Details</h2>
 
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">Roll Number:</label>
-                    <input
-                        value={roll}
-                        type="text"
-                        onChange={
-                            (event) => {
-                                setRoll(event.target.value)
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your roll number"
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">Branch:</label>
-                    <input
-                        value={branch}
-                        type="text"
-                        onChange={
-                            (event) => {
-                                setBranch(event.target.value)
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your branch"
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">Current Semester:</label>
-                    <input
-                        value={semester}
-                        type="text"
-                        onChange={(e) => setSemester(e.target.value.toUpperCase().replace(/\s/g, ""))}
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your semester"
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">Batch:</label>
-                    <input
-                        value={batch}
-                        type="text"
-                        onChange={
-                            (event) => {
-                                setBatch(event.target.value)
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your branch"
-                    />
-                </div>
-
-                <div className="flex items-center">
-                    <label className="text-lg font-medium">College:</label>
-                    <input
-                        value={college}
-                        type="text"
-                        onChange={
-                            (event) => {
-                                setCollege(event.target.value)
-                            }
-                        }
-                        className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                        placeholder="Enter your branch"
-                    />
-                </div>
-
-                {subjects.map((subject, index) => (
-                    <div
-                        key={index}
-                        className="flex items-center">
-                        <label className="text-lg font-medium">Subject {index + 1}:</label>
-                        <div className="overflow-x-auto py-1 px-2">
-                            <input
-                                type="text"
-                                value={subject.name}
-                                onChange={
-                                    (event) => {
-                                        updateSubject(index, "name", event.target.value)
-                                    }
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">Name:</label>
+                        <input
+                            value={name}
+                            type="text"
+                            onChange={
+                                (event) => {
+                                    setName(event.target.value)
                                 }
-                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                                placeholder={`Enter subject ${index + 1}`}
-                            />
-                            <input
-                                type="text"
-                                value={subject.credits}
-                                onChange={
-                                    (event) => {
-                                        updateSubject(index, "credits", event.target.value)
-                                    }
-                                }
-                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                                placeholder={`Enter subject ${index + 1} credits`}
-                            />
-                            <input
-                                type="text"
-                                value={subject.code}
-                                onChange={
-                                    (event) => {
-                                        updateSubject(index, "code", event.target.value.toUpperCase().replace(/\s/g, ""))
-                                    }
-                                }
-                                className="ml-4 border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
-                                placeholder={`Enter course code`}
-                            />
-                        </div>
-                        {subjects.length > 1 && (
-                            <button
-                                onClick={() => removeSubject(index)}
-                                className="exo cursor-pointer ml-4 text-red-600 hover:text-red-400 text-lg"
-                            >
-                                Delete
-                            </button>
-                        )}
+                            }
+                            className="text-sm border border-gray-400 rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your name"
+                        />
                     </div>
-                )
-                )}
 
-                <div className="flex justify-center">
-                    <button
-                        onClick={addSubject}
-                        className="text-[rgb(75,64,56)] hover:font-bold cursor-pointer">
-                        Click to add more subjects
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">Roll Number:</label>
+                        <input
+                            value={roll}
+                            type="text"
+                            onChange={
+                                (event) => {
+                                    setRoll(event.target.value)
+                                }
+                            }
+                            className="border-gray-400 text-sm border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your roll number"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">Branch:</label>
+                        <input
+                            value={branch}
+                            type="text"
+                            onChange={
+                                (event) => {
+                                    setBranch(event.target.value)
+                                }
+                            }
+                            className="border-gray-400 text-sm border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your branch"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">Current Semester:</label>
+                        <input
+                            value={semester}
+                            type="text"
+                            onChange={(e) => setSemester(e.target.value.toUpperCase().replace(/\s/g, ""))}
+                            className="border-gray-400 text-sm border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your semester"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">Batch:</label>
+                        <input
+                            value={batch}
+                            type="text"
+                            onChange={
+                                (event) => {
+                                    setBatch(event.target.value)
+                                }
+                            }
+                            className="border-gray-400 text-sm border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your branch"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <label className="text-md font-medium">College:</label>
+                        <input
+                            value={college}
+                            type="text"
+                            onChange={
+                                (event) => {
+                                    setCollege(event.target.value)
+                                }
+                            }
+                            className="border-gray-400 text-sm border rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                            placeholder="Enter your branch"
+                        />
+                    </div>
                 </div>
+                {/* subjects */}
+                <div className="bg-[rgb(202,170,152,0.2)] p-4 rounded-lg flex flex-col gap-4 overflow-y-auto max-h-130">
+                    <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Subjects</h2>
+                    {subjects.map((subject, index) => (
+                        <div
+                            key={index}
+                            className="flex md:items-center flex-col md:flex-row gap-4">
+                            <label className="text-md font-medium">Subject {index + 1}:</label>
+                            <div className="flex flex-col lg:flex-row gap-2">
+                                <div className="flex flex-col md:flex-row gap-2">
+                                    <input
+                                        type="text"
+                                        value={subject.name}
+                                        onChange={
+                                            (event) => {
+                                                updateSubject(index, "name", event.target.value)
+                                            }
+                                        }
+                                        className="border border-gray-400 text-sm rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                        placeholder={`Enter subject ${index + 1}`}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={subject.credits}
+                                        onChange={
+                                            (event) => {
+                                                updateSubject(index, "credits", event.target.value)
+                                            }
+                                        }
+                                        className="border border-gray-400 text-sm  rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                        placeholder={`Enter subject ${index + 1} credits`}
+                                    />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={subject.code}
+                                    onChange={
+                                        (event) => {
+                                            updateSubject(index, "code", event.target.value.toUpperCase().replace(/\s/g, ""))
+                                        }
+                                    }
+                                    className="border border-gray-400 text-sm  rounded-lg p-2 focus:ring-2 focus:ring-[rgb(32,41,64)] focus:outline-none"
+                                    placeholder={`Enter course code`}
+                                />
+                            </div>
+                            {subjects.length > 1 && (
+                                <button
+                                    onClick={() => removeSubject(index)}
+                                    className="exo cursor-pointer text-red-600 hover:text-red-400 text-sm"
+                                >
+                                    Delete
+                                </button>
+                            )}
+                        </div>
+                    )
+                    )}
+                    <div className="flex justify-center">
+                        <button
+                            onClick={addSubject}
+                            className="exo text-[rgb(75,64,56)] hover:font-bold cursor-pointer">
+                            Click to add more subjects
+                        </button>
+                    </div>
+                </div>
+
+
+
             </div>
 
             {
@@ -283,20 +301,24 @@ function Profile({ user }) {
                     </p>
                 )
             }
-            <div>
+            <div className="flex gap-2 items-center justify-center">
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="sniglet-regular cursor-pointer mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
+                    className="sniglet-regular cursor-pointer disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]">
                     {
                         saving ? "Saving..." : "Save"
                     }
                 </button>
                 <button
                     onClick={() => setShowSemesterModal(true)}
-                    className="sniglet-regular cursor-pointer ml-4 mt-2 disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
+                    className="sniglet-regular cursor-pointer disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
                 >
                     Udgrade Semester
+                </button>
+                <button onClick={() => { handleLogout(); }} disabled={logoutLoading}
+                    className="sniglet-regular disabled:opacity-50 cursor-pointer bg-yellow-50 text-yellow-800 font-bold px-4 py-2 rounded-lg hover:bg-[rgb(75,64,56,0.2)]">
+                    {logoutLoading ? "Logging Out..." : "Logout"}
                 </button>
             </div>
             {

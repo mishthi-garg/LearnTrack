@@ -134,10 +134,10 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
         onComplete();
     }
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-[rgb(238,238,238)] rounded-2xl shadow-xl p-6 w-full maw-w-lg mx-4 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl space-mono-bold text-[rgb(40,20,9)]">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+            <div className="bg-[rgb(238,238,238)] flex flex-col gap-6 rounded-2xl shadow-xl p-6 w-full maw-w-lg max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl cause font-bold text-[rgb(40,20,9)]">
                         Enter Final Grades
                     </h2>
                     <button
@@ -147,17 +147,17 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                         <span>&times;</span>
                     </button>
                 </div>
-                <p className="text-sm text-[rgb(75,64,56)] mb-4">
+                <p className="text-sm text-[rgb(75,64,56)]">
                     If any subjects already saved in Past Grades will be saved automatically.
                 </p>
-                <div className="mb-4">
-                    <label className="text-md font-bold">Session:</label>
+                <div className="flex gap-2 items-center">
+                    <label className="text-md space-mono-bold">Session:</label>
                     <input
                         type="text"
                         value={session}
                         onChange={(e) => setSession(e.target.value)}
                         placeholder="e.g. 2024-25"
-                        className="ml-2 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                        className="border-gray-400 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                     />
                 </div>
                 <div className="flex flex-col gap-3">
@@ -188,7 +188,7 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                                                             ...prev,
                                                             [subject.course_code]: e.target.value
                                                         }))}
-                                                        className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                        className="border border-gray-400 rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     {/* <input
                                                         type="text"
@@ -198,20 +198,20 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                                                         className="border rounded-lg p-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     /> */}
                                                     <div className="flex items-center gap-2">
-                                                    <label for="final_grades">Final Grade:</label>
-                                                        <select name="final_grades" id="final_grades" 
-                                                    value={finalGrades[subject.course_code] || ""}
-                                                    onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}>
-                                                        <option value="" disabled hidden>Select</option>
-                                                        <option value="A">A</option>
-                                                        <option value="AB">AB</option>
-                                                        <option value="B">B</option>
-                                                        <option value="BC">BC</option>
-                                                        <option value="C">C</option>
-                                                        <option value="CD">CD</option>
-                                                        <option value="D">D</option>
-                                                        <option value="F">F</option>
-                                                    </select>
+                                                        <label for="final_grades" className="text-gray-500 text-sm">Final Grade:</label>
+                                                        <select name="final_grades" id="final_grades" className="text-sm"
+                                                            value={finalGrades[subject.course_code] || ""}
+                                                            onChange={(e) => handleGradeInput(subject.course_code, e.target.value)}>
+                                                            <option value="" disabled hidden>Select</option>
+                                                            <option value="A">A</option>
+                                                            <option value="AB">AB</option>
+                                                            <option value="B">B</option>
+                                                            <option value="BC">BC</option>
+                                                            <option value="C">C</option>
+                                                            <option value="CD">CD</option>
+                                                            <option value="D">D</option>
+                                                            <option value="F">F</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             )
@@ -222,14 +222,14 @@ function ChangeSemesterModal({ user, currentSemester, subjects, onClose, onCompl
                         )
                     }
                 </div>
-                <div className="flex justify-end gap-3 mt-6">
-                    <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
+                <div className="flex justify-end gap-3 mt-6 items-center">
+                    <button onClick={onClose} className="exo px-4 py-2 text-sm text-gray-500 hover:text-gray-700">
                         Cancel
                     </button>
                     <button
                         onClick={handleConfirm}
                         disabled={saving}
-                        className="bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
+                        className="sniglet-regular bg-[rgb(75,86,148)] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-[rgb(32,41,64)]"
                     >
                         {saving ? "Processing..." : "Confirm & Start New Semester"}
                     </button>

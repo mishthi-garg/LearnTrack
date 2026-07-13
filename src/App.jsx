@@ -128,14 +128,19 @@ function App() {
                   <NavLink
                     to="/profile"
                     className={({ isActive }) =>
-                      isActive ? "font-semibold text-[rgb(238,238,238)] text-2xl" : "text-[rgb(221,221,221)] text-2xl"
+                      isActive ? "font-semibold text-[rgb(238,238,238)] text-2xl" : "text-[rgb(221,221,221)] text-2xl hover:text-[rgb(255,222,66)]"
                     }
                   >
                     <VscAccount />
                   </NavLink>
+                  {isHovered && (
+                    <div className="bg-black/70 text-white rounded-full absolute top-9 -right-6 w-20 text-xs text-center px-2 py-1">
+                      Edit Profile
+                    </div>
+                  )}
                   {
                     isHovered && (
-                      <div className="hidden md:block fixed right-0 top-18 w-78 h-screen pointer-events-none z-40">
+                      <div className="fixed right-0 top-18 w-78 h-screen pointer-events-none z-40">
                         <Lanyard
                           position={[0, 0, 20]}
                           gravity={[0, -40, 0]}
@@ -158,8 +163,8 @@ function App() {
 
               {
                 menuOpen && (
-                  <div className="md:hidden flex rounded-lg pr-4 pl-2 py-6 shadow-lg flex-col gap-2 border border-[rgb(75,64,56)] bg-[rgb(238,238,238)] absolute right-4 top-16 z-20">
-                    <div className="border-b-1 border-gray-400 pb-2 mb-2">
+                  <div className="md:hidden flex rounded-lg px-4 py-4 shadow-lg flex-col gap-2 bg-[rgb(238,238,238)] absolute right-6 top-14 z-20">
+                    <div className="cause border-b-1 border-gray-400 pb-2 mb-2">
                       <p className="text-sm font-bold">{profileName || ""}</p>
                       <p className="text-sm">{user.email}</p>
                     </div>
@@ -167,8 +172,8 @@ function App() {
                       to="/"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }
+                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }`}
                     >
                       Dashboard
                     </NavLink>
@@ -177,8 +182,8 @@ function App() {
                       to="/timetable"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }
+                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }`}
                     >
                       Timetable
                     </NavLink>
@@ -187,8 +192,8 @@ function App() {
                       to="/tutor"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }
+                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }`}
                     >
                       Tutor
                     </NavLink>
@@ -197,8 +202,8 @@ function App() {
                       to="/predict"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }
+                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }`}
                     >
                       Predict
                     </NavLink>
@@ -206,12 +211,12 @@ function App() {
                       to="/profile"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }
+                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                      }`}
                     >
                       Profile
                     </NavLink>
-                    <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={logoutLoading} className="disabled:opacity-50 cursor-pointer text-sm bg-[rgb(75,86,148)] text-white font-bold px-3 py-2 rounded-lg hover:bg-[rgb(32,41,64)] mt-1">
+                    <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={logoutLoading} className="sniglet-regular disabled:opacity-50 cursor-pointer text-sm bg-[rgb(75,86,148)] text-white font-bold px-3 py-2 rounded-lg hover:bg-[rgb(32,41,64)] mt-1">
                       {logoutLoading ? "Logging Out..." : "Logout"}
                     </button>
                   </div>

@@ -701,8 +701,8 @@ function Predict({ user }) {
                                                         onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     /> */}
-                                                    <label for="grades">Grade:</label>
-                                                    <select name="grades" id="grades" 
+                                                    <label for="grades" className="text-gray-500 text-sm">Grade:</label>
+                                                    <select name="grades" id="grades" className="text-sm"
                                                     value={gradeInput[semester]?.grade || ""}
                                                     onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}>
                                                         <option value="" disabled hidden>Select</option>

@@ -86,7 +86,7 @@ export default function AuthPage(){
                                 setMessage('');
                             }
                         }
-                        className="text-[rgb(32,41,64)] font-semibold hover:underline cursor-pointer"
+                        className="exo text-[rgb(32,41,64)] font-semibold hover:underline cursor-pointer"
                     >
                         {
                             isLogin? ' Sign Up ' : ' Sign In '

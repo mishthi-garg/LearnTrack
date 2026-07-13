@@ -65,7 +65,10 @@ function Tutor({ user }) {
         fetchSubjects();
     }, [user]);
     useEffect(() => {
-        if (!user || !selectedSubject) return;
+        if (!user || !selectedSubject) {
+            setDocuments([]);
+            return;
+        }
         const fetchDocuments = async (courseCode) => {
             setLoading(true);
             const { data, error } = await supabase
@@ -193,16 +196,16 @@ function Tutor({ user }) {
 
     const openSubjectTutor = (sub) => {
         console.log("sending this:", subjects.find(s => s.course_code === sub));
-         navigate(`/chat/subject_tutor`, {
-      state: {
-        subject: subjects.find(s => s.course_code === sub),
-        semester: currSemester,
-      },
-    });
+        navigate(`/chat/subject_tutor`, {
+            state: {
+                subject: subjects.find(s => s.course_code === sub),
+                semester: currSemester,
+            },
+        });
     };
 
     const openStudyPlan = () => {
-         navigate(`/chat/study_plan`);
+        navigate(`/chat/study_plan`);
     };
 
     const grouped = {};
@@ -240,7 +243,7 @@ function Tutor({ user }) {
                         onChange={handleFileChange}
                     />
                 </div>
-                <p className="text-[rgb(32,41,64)] italic text-sm">Select a subject to upload documents.</p>
+                <p className="text-sm">Select a subject to upload documents.</p>
                 <button
                     onClick={() => {
                         setListSemesters(!listSemesters);
@@ -249,7 +252,7 @@ function Tutor({ user }) {
                     }
 
                     }
-                    className="italic bg-yellow-50 cursor-pointer shadow-sm text-yellow-800 text-xs mt-2 rounded-full px-4 py-0.25">
+                    className="exo bg-yellow-50 cursor-pointer shadow-sm text-yellow-800 text-xs mt-2 rounded-full px-4 py-0.25 hover:bg-[rgb(75,64,56,0.2)]">
                     {listSemesters ? "click to see current subjects" : "click to see older subjects"
                     }
                 </button>
@@ -262,10 +265,10 @@ function Tutor({ user }) {
                                 sortedSemesters.map((semester) => {
                                     return (
                                         <button key={semester}
-                                            className={`px-6 py-1 rounded-full shadow-sm text-xs transition-all duration-200
+                                            className={`cursor-pointer px-6 py-1 rounded-full shadow-sm text-sm transition-all duration-200
                                         ${selectedSemester === semester ?
-                                                    "bg-[rgb(75,64,56)] border border-[rgb(75,64,56)] text-[rgb(238,238,238)]"
-                                                    : "border border-[rgb(75,64,56)] bg-[rgb(238,238,238)] text-[rgb(75,64,56)] hover:bg-yellow-50"
+                                                    "bg-[rgb(32,41,64)] text-[rgb(238,238,238)] px-12"
+                                                    : "bg-[rgb(32,41,64)] text-[rgb(238,238,238)] hover:bg-white hover:text-black"
                                                 }`}
                                             onClick={() => {
                                                 setSelectedSemester(
@@ -299,10 +302,10 @@ function Tutor({ user }) {
                                     setDocSemester(subject.semester);
                                 }
                                 }
-                                className={`px-6 py-1 rounded-full text-xs transition-all duration-400
+                                className={`cursor-pointer px-6 py-1 rounded-full text-xs transition-all duration-400
                     ${selectedSubject === subject.course_code
-                                        ? "bg-[rgb(32,41,64)] border border-[rgb(32,41,64)] text-[rgb(238,238,238)]"
-                                        : "border border-[rgb(32,41,64)] text-[rgb(32,41,64)] hover:bg-yellow-50"
+                                        ? "bg-yellow-700 text-[rgb(238,238,238)]"
+                                        : "bg-white text-[rgb(32,41,64)] hover:bg-yellow-50"
                                     }`}
                             >
                                 {subject.subject_name}
@@ -324,10 +327,10 @@ function Tutor({ user }) {
                                         );
                                         setDocSemester(currSemester);
                                     }}
-                                    className={`px-6 py-1 rounded-full text-xs transition-all duration-400
-                        ${selectedSubject === subject.course_code ?
-                                            "bg-[rgb(32,41,64)] border border-[rgb(32,41,64)] text-[rgb(238,238,238)]"
-                                            : "border border-[rgb(32,41,64)] text-[rgb(32,41,64)] hover:bg-yellow-50"
+                                    className={`cursor-pointer px-6 py-1 rounded-full text-xs transition-all duration-400
+                        ${selectedSubject === subject.course_code
+                                            ? "bg-yellow-700 text-[rgb(238,238,238)]"
+                                            : "bg-white text-[rgb(32,41,64)] hover:bg-yellow-50"
                                         }`}
                                 >
                                     {subject.name}
@@ -341,7 +344,7 @@ function Tutor({ user }) {
                     {loading ? (
                         <p className="text-gray-500">Loading...</p>
                     ) : documents.length === 0 ? (
-                        <p className="text-gray-500">No documents uploaded</p>
+                        <p className="text-gray-500">No documents</p>
                     ) : (
                         documents.map((doc) => (
                             <div
@@ -352,7 +355,7 @@ function Tutor({ user }) {
                                     href={doc.file_url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="truncate text-[rgb(75,86,148)] hover:underline"
+                                    className="truncate hover:underline"
                                 >
                                     {doc.file_name}
                                 </a>
@@ -411,13 +414,13 @@ function Tutor({ user }) {
             </div>
             <div>
                 <h2 className="text-xl space-mono-bold text-[rgb(75,64,56)] mt-6">Need help with study planning?</h2>
-                <button 
-                onClick={openStudyPlan}
-                className="sniglet-regular mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
+                <button
+                    onClick={openStudyPlan}
+                    className="sniglet-regular mt-4 bg-[rgb(75,86,148)] text-white px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)] cursor-pointer">
                     Let's Chat!
                 </button>
             </div>
-{/* {chatMode && (
+            {/* {chatMode && (
     <ChatModal 
         mode={chatMode}
         subject={subjects.find(s => s.course_code === selectedTutorSubject)}

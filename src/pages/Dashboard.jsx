@@ -203,7 +203,7 @@ function Dashboard({ user }) {
 
             {
                 !profileComplete && (
-                    <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex items-center justify-between">
+                    <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex gap-3 items-center justify-between">
                         <p className="englebert-regular text-yellow-800 text-lg">Seems like your profile is incomplete! Please complete your profile to get the most out of LearnTrack.</p>
                         <NavLink to="/profile" className="exo text-sm font-bold text-[rgb(75,86,148)] hover:underline">
                             Click to Complete Profile
@@ -213,9 +213,9 @@ function Dashboard({ user }) {
                 )
             }
 
-            <div className="flex gap-6">
+            <div className="flex gap-6 flex-col md:flex-row">
 
-                <div className="p-4 rounded-lg bg-[rgb(202,170,152,0.2)] basis-1/3 max-h-64 overflow-y-auto">
+                <div className="p-4 rounded-lg bg-[rgb(202,170,152,0.2)] basis-1/3 max-h-full overflow-y-auto">
                     <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">To-Do List</h2>
 
                     <div className="py-2 flex gap-3">

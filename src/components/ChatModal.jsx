@@ -105,7 +105,7 @@ const onClose = () => {
         // <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
              <div className="bg-white rounded-lg w-full h-[calc(100vh-112px)] flex flex-col gap-6 p-4">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg space-mono-bold text-[rgb(40,20,9)]">
+                    <h3 className="text-xl space-mono-bold text-[rgb(40,20,9)]">
                         {mode === "subject_tutor" ? `Tutor — ${subject?.name}` : "Study Planner"}
                     </h3>
                     <button
@@ -130,19 +130,19 @@ const onClose = () => {
                     {messages.map((m, i) => (
                         <div
                             key={i}
-                            className={`max-w-[80%] min-w-0 px-3 py-2 rounded-lg text-sm 
-                                [&_p]:mb-4
+                            className={`max-w-[80%] min-w-0 px-4 text-md 
+                                [&_p]:my-2
                                 [&_ul]:my-4
                                 [&_ol]:my-4
-                                [&_li]:mb-2
-                                [&_h1]:mb-4 [&_h1]:mt-6
-                                [&_h2]:mb-3 [&_h2]:mt-5
-                                [&_h3]:mb-2 [&_h3]:mt-4
+                                [&_li]:my-1
+                                [&_h1]:my-2 [&_h1]:my-3
+                                [&_h2]:my-1.5 [&_h2]:my-2.5
+                                [&_h3]:my-1 [&_h3]:my-2
                                 [&_pre]:my-4 
                                 [&_code]:rounded [&_code]:px-2 [&_code]:bg-gray-100
                                 ${m.role === "user"
-                                    ? "self-end bg-[rgb(75,86,148)] text-white"
-                                    : "self-start bg-[rgb(202,170,152,0.25)] text-[rgb(75,64,56)]"
+                                    ? "self-end rounded-2xl bg-[rgb(32,41,64)] text-white"
+                                    : "self-start bg-gray-50 rounded-xl text-[rgb(75,64,56)]"
                                 }`}
                         >
                             <div className="overflow-x-auto"> 

@@ -319,6 +319,7 @@ function Band({
                             <Text
                                 position={[0, 0.45, 0.02]}   // nudge slightly in front of the card surface
                                 fontSize={0.09}
+                                font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/cause/Cause[wght].ttf"
                                 color="#eeeeee"
                                 anchorX="center"
                                 anchorY="middle"
@@ -333,6 +334,7 @@ function Band({
                             <Text
                                 position={[0, 0.25, 0.02]}   // nudge slightly in front of the card surface
                                 fontSize={0.07}
+                                font="https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/cause/Cause[wght].ttf"
                                 color="#dddddd"
                                 anchorX="center"
                                 anchorY="middle"
