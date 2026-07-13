@@ -9,29 +9,42 @@ router.post("/study-plan-chat", async (req, res) => {
     console.log("1. Request received");
     // Verify the request actually comes from a logged-in user
     const authHeader = req.headers.authorization;
-     console.log("2. Auth header exists:", !!authHeader);
+    console.log("2. Auth header exists:", !!authHeader);
     const token = authHeader?.split(" ")[1];
     console.log("3. Token exists:", !!token);
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-      console.log("4. Auth error:", authError);
+    console.log("4. Auth error:", authError);
     console.log("5. User:", user?.id);
 
     if (authError || !user) {
       console.log("6. Unauthorized");
       return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
     const { message, history = [] } = req.body;
     // Pull the student's  subjects
-  console.log("7. Before subjects query");
+    console.log("7. Before subjects query");
+
     const { data: subjects, error: subjectsError } = await supabase
       .from("subjects")
       .select("name, credits, course_code")
       .eq("user_id", user.id);
-console.log("8. Subjects:", subjects);
-console.log("Subjects error:", subjectsError);
+    console.log("8. Subjects:", subjects);
+    console.log("Subjects error:", subjectsError);
+    const today = new Date().toISOString().split('T')[0];
+    const { data: events, error: eventsError } = await supabase
+      .from("reminders")
+      .select("*")
+      .eq("user_id", user.id)
+      .gte("date", today)
+      .order("date", { ascending: true })
+      .order("time", { ascending: true });
+      console.log("Events error:", eventsError);
+    const eventList = events?.length 
+      ? events.map((ev)=>`${ev.title} on date: "${ev.date}" at time:"${ev.time}"`).join(", ")
+      : "no upcoming events yet";
     const subjectList = subjects?.length
       ? subjects.map((s) => `${s.name} (${s.course_code}, ${s.credits} credits)`).join(", ")
       : "no subjects on record yet";
@@ -40,15 +53,18 @@ console.log("Subjects error:", subjectsError);
     const systemPrompt = `You are a friendly and organized study planning assistant.
 
       The student's current subjects are:
-      ${subjectList}
+      ${subjectList}.
+      Their upcoming events are:
+      ${eventList}.
 
       Your goal is to help the student study more effectively by creating realistic, practical, and personalized study plans.
 
       Guidelines:
-      - Base your recommendations on the student's actual subjects whenever relevant, and suggest how to divide time among these specific subjects instead of giving generic advice.
-      - If the student asks about productivity, motivation, revision, exams, or time management, tailor your advice to their subjects.
+      - Base your recommendations on the student's actual subjects and events whenever relevant, and suggest how to divide time among these instead of giving generic advice.
+      - If the student asks about productivity, motivation, revision, exams, or time management, tailor your advice to their subjects and upcoming events.
       - If the student asks about something unrelated to their subjects, answer normally while maintaining your role as a helpful study planning assistant.
       - If the student has no subjects on record, ask them to list their current subjects before making subject-specific recommendations.
+      - If the student has no events on record, ask them if there are some important exams or priorities coming up to improve recommendations.
 
       Planning Principles:
       - Prioritize subjects that need more effort while ensuring all subjects receive attention. If you don't know which subjects need more focus, ask the student which ones they find hardest before assuming.
