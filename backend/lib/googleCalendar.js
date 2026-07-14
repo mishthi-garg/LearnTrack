@@ -58,7 +58,7 @@ async function pushReminderToGoogle(userId, reminder) {
     };
 
     if (reminder.all_day) {
-        event.start = {
+       event.start = {
             date: reminder.date,
         };
 
@@ -67,23 +67,23 @@ async function pushReminderToGoogle(userId, reminder) {
             date: addOneDay(reminder.date),
         };
     } else {
-        const start = new Date(`${reminder.date}T${reminder.time}`);
-
         // Default duration = 1 hour
-        let end;
+        let endTime = reminder.end_time;
 
-        if (reminder.end_time) {
-            end = new Date(`${reminder.date}T${reminder.end_time}`);
-        } else {
-            end = new Date(start.getTime() + 60 * 60 * 1000);
+        if (!endTime) {
+            const end = new Date(`${reminder.date}T${reminder.time}`);
+            end.setHours(end.getHours() + 1);
+            endTime = end.toTimeString().slice(0, 5);
         }
 
         event.start = {
-            dateTime: start.toISOString(),
+            dateTime: `${reminder.date}T${reminder.time}:00`,
+            timeZone: "Asia/Kolkata",
         };
 
         event.end = {
-            dateTime: end.toISOString(),
+            dateTime: `${reminder.date}T${endTime}:00`,
+            timeZone: "Asia/Kolkata",
         };
     }
     const res = await calendar.events.insert({
