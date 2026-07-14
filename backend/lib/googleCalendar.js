@@ -3,7 +3,7 @@ const { google } = require("googleapis");
 const { getOAuthClient } = require("./googleClient");
 const { supabase } = require("./client");
 
-const GOOGLE_COLORS =  {
+const GOOGLE_COLORS = {
     red: "11",      // Tomato
     orange: "6",    // Tangerine
     green: "2",     // Sage
@@ -207,94 +207,109 @@ async function syncCalendarChanges(channelId) {
     }
 
     console.log("========== CHANGES ==========");
+    console.log("Items:", response.data.items?.length);
+    console.log("Next Sync Token:", response.data.nextSyncToken);
+    console.log(JSON.stringify(response.data, null, 2));
 
     for (const event of response.data.items) {
 
-    // ---------------- DELETE ----------------
+        // ---------------- DELETE ----------------
 
-    if (event.status === "cancelled") {
+        if (event.status === "cancelled") {
 
-        await supabase
+            const { error } = await supabase
+                .from("reminders")
+                .delete()
+                .eq("google_event_id", event.id);
+
+            if (error) {
+                console.error("Delete failed:", error);
+            }
+
+            continue;
+        }
+
+        // ---------------- DATE/TIME ----------------
+
+        let date;
+        let time = null;
+        let endTime = null;
+        let allDay = false;
+
+        if (event.start.date) {
+
+            // All-day event
+
+            allDay = true;
+            date = event.start.date;
+
+        } else {
+
+            const start = new Date(event.start.dateTime);
+            const end = new Date(event.end.dateTime);
+
+            date = start.toISOString().split("T")[0];
+
+            time = start.toTimeString().slice(0, 5);
+            endTime = end.toTimeString().slice(0, 5);
+        }
+
+        const reminder = {
+            title: event.summary || "(No title)",
+            notes: event.description || null,
+
+            date,
+
+            time,
+            end_time: endTime,
+
+            all_day: allDay,
+
+            source: "google",
+
+            color:
+                GOOGLE_TO_LT_COLOR[event.colorId] ??
+                "blue",
+
+            google_event_id: event.id,
+
+            google_calendar_id: "primary",
+
+            user_id: integration.user_id,
+        };
+
+        // ---------------- UPSERT ----------------
+
+        const { data: existing } = await supabase
             .from("reminders")
-            .delete()
-            .eq("google_event_id", event.id);
+            .select("id")
+            .eq("google_event_id", event.id)
+            .maybeSingle();
 
-        continue;
-    }
+        if (existing) {
 
-    // ---------------- DATE/TIME ----------------
+            const { error } = await supabase
+                .from("reminders")
+                .update(reminder)
+                .eq("id", existing.id);
 
-    let date;
-    let time = null;
-    let endTime = null;
-    let allDay = false;
+            if (error) {
+                console.error("Update failed:", error);
+            }
 
-    if (event.start.date) {
+        } else {
 
-        // All-day event
+            const { error } = await supabase
+                .from("reminders")
+                .insert(reminder);
 
-        allDay = true;
-        date = event.start.date;
+            if (error) {
+                console.error("Insert failed:", error);
+            }
 
-    } else {
-
-        const start = new Date(event.start.dateTime);
-        const end = new Date(event.end.dateTime);
-
-        date = start.toISOString().split("T")[0];
-
-        time = start.toTimeString().slice(0, 5);
-        endTime = end.toTimeString().slice(0, 5);
-    }
-
-    const reminder = {
-        title: event.summary || "(No title)",
-        notes: event.description || null,
-
-        date,
-
-        time,
-        end_time: endTime,
-
-        all_day: allDay,
-
-        source: "google",
-
-        color:
-            GOOGLE_TO_LT_COLOR[event.colorId] ??
-            "blue",
-
-        google_event_id: event.id,
-
-        google_calendar_id: "primary",
-
-        user_id: integration.user_id,
-    };
-
-    // ---------------- UPSERT ----------------
-
-    const { data: existing } = await supabase
-        .from("reminders")
-        .select("id")
-        .eq("google_event_id", event.id)
-        .maybeSingle();
-
-    if (existing) {
-
-        await supabase
-            .from("reminders")
-            .update(reminder)
-            .eq("id", existing.id);
-
-    } else {
-
-        await supabase
-            .from("reminders")
-            .insert(reminder);
+        }
 
     }
-
-}
 
     await supabase
         .from("google_integrations")
