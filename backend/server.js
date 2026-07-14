@@ -8,6 +8,7 @@ const documentsRouter = require("./routes/documents.js");
 const tutorChatRouter = require("./routes/tutorChat.js");
 const studyPlanChatRouter = require("./routes/studyPlanChat.js");
 
+const googleAuthRoutes = require("./routes/googleAuth.js");
 const googleSyncRoutes = require("./routes/googleSync.js");
 
 const modelStats = require("./model_stats.json");
@@ -31,6 +32,7 @@ app.use("/api", tutorChatRouter);
 app.use("/api", studyPlanChatRouter);
 
 app.use(googleSyncRoutes);
+app.use(googleAuthRoutes);
 
 app.get("/", (req, res) => {
     res.json({ status: "LearnTrack Backend is running" });
