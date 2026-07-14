@@ -3,13 +3,23 @@ const { google } = require("googleapis");
 const { getOAuthClient } = require("./googleClient");
 const { supabase } = require("./client");
 
-const GOOGLE_COLORS = {
-    red: "11",
-    orange: "6",
-    yellow: "5",
-    green: "2",
-    blue: "9",
-    purple: "3",
+const GOOGLE_COLORS =  {
+    red: "11",      // Tomato
+    orange: "6",    // Tangerine
+    green: "2",     // Sage
+    blue: "9",      // Blueberry
+    black: "8",     // Graphite
+    zinc: "3",      // Grape (closest match)
+};
+
+const GOOGLE_TO_LT_COLOR = {
+    "11": "red",      // Tomato
+    "6": "orange",    // Tangerine
+    "5": "orange",    // Banana -> closest available
+    "2": "green",     // Sage
+    "9": "blue",      // Blueberry
+    "3": "zinc",      // Grape -> closest neutral
+    "8": "black",     // Graphite
 };
 
 function addOneDay(dateString) {
@@ -200,16 +210,91 @@ async function syncCalendarChanges(channelId) {
 
     for (const event of response.data.items) {
 
-        console.log({
-            id: event.id,
-            summary: event.summary,
-            status: event.status,
-            start: event.start,
-            end: event.end,
-            color: event.colorId,
-        });
+    // ---------------- DELETE ----------------
+
+    if (event.status === "cancelled") {
+
+        await supabase
+            .from("reminders")
+            .delete()
+            .eq("google_event_id", event.id);
+
+        continue;
+    }
+
+    // ---------------- DATE/TIME ----------------
+
+    let date;
+    let time = null;
+    let endTime = null;
+    let allDay = false;
+
+    if (event.start.date) {
+
+        // All-day event
+
+        allDay = true;
+        date = event.start.date;
+
+    } else {
+
+        const start = new Date(event.start.dateTime);
+        const end = new Date(event.end.dateTime);
+
+        date = start.toISOString().split("T")[0];
+
+        time = start.toTimeString().slice(0, 5);
+        endTime = end.toTimeString().slice(0, 5);
+    }
+
+    const reminder = {
+        title: event.summary || "(No title)",
+        notes: event.description || null,
+
+        date,
+
+        time,
+        end_time: endTime,
+
+        all_day: allDay,
+
+        source: "google",
+
+        color:
+            GOOGLE_TO_LT_COLOR[event.colorId] ??
+            "blue",
+
+        google_event_id: event.id,
+
+        google_calendar_id: "primary",
+
+        user_id: integration.user_id,
+    };
+
+    // ---------------- UPSERT ----------------
+
+    const { data: existing } = await supabase
+        .from("reminders")
+        .select("id")
+        .eq("google_event_id", event.id)
+        .maybeSingle();
+
+    if (existing) {
+
+        await supabase
+            .from("reminders")
+            .update(reminder)
+            .eq("id", existing.id);
+
+    } else {
+
+        await supabase
+            .from("reminders")
+            .insert(reminder);
 
     }
+
+}
 
     await supabase
         .from("google_integrations")
