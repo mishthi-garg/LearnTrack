@@ -8,6 +8,8 @@ const documentsRouter = require("./routes/documents.js");
 const tutorChatRouter = require("./routes/tutorChat.js");
 const studyPlanChatRouter = require("./routes/studyPlanChat.js");
 
+const googleSyncRoutes = require("./routes/googleSync.js");
+
 const modelStats = require("./model_stats.json");
 const TRAINING_MEAN = modelStats.training_mean;//63
 const TRAINING_STD = modelStats.training_std;//11
@@ -27,6 +29,8 @@ console.log("First 20 chars:", process.env.SUPABASE_SERVICE_KEY?.slice(0, 20));
 app.use("/api", documentsRouter);
 app.use("/api", tutorChatRouter);
 app.use("/api", studyPlanChatRouter);
+
+app.use(googleSyncRoutes);
 
 app.get("/", (req, res) => {
     res.json({ status: "LearnTrack Backend is running" });

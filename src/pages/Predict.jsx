@@ -458,7 +458,8 @@ function Predict({ user }) {
 
                                         {
                                             marks[subject.course_code] && marks[subject.course_code].length > 0 && (
-                                                <table className="w-full text-sm">
+                                                <div className="overflow-x-auto">
+                                                <table className="w-full text-sm border-separate border-spacing-x-2 border-spacing-y-2">
                                                     <thead>
                                                         <tr className="text-left text-gray-500 border-b">
                                                             <th className="pb-2">Exam Type</th>
@@ -472,7 +473,7 @@ function Predict({ user }) {
                                                         {
                                                             marks[subject.course_code].map((m) => (
                                                                 <tr key={m.id} className="border-b border-gray-100">
-                                                                    <td className="py2">{m.exam_type}</td>
+                                                                    <td className="py-2">{m.exam_type}</td>
                                                                     <td className="py-2">{m.marks_scored}</td>
                                                                     <td className="py-2">{m.max_marks}</td>
                                                                     <td className="py-2">{m.weightage}</td>
@@ -489,6 +490,7 @@ function Predict({ user }) {
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             )
                                         }
 
@@ -498,7 +500,7 @@ function Predict({ user }) {
                                                 placeholder="Exam type (e.g. Mid1)"
                                                 value={inputs[subject.course_code]?.exam_type || ""}
                                                 onChange={(e) => handleInputChange(subject.course_code, "exam_type", e.target.value)}
-                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                             />
                                             <input
                                                 type="number"
@@ -506,7 +508,7 @@ function Predict({ user }) {
                                                 placeholder="Marks scored"
                                                 value={inputs[subject.course_code]?.marks_scored || ""}
                                                 onChange={(e) => handleInputChange(subject.course_code, "marks_scored", e.target.value)}
-                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                             />
                                             <input
                                                 type="number"
@@ -514,7 +516,7 @@ function Predict({ user }) {
                                                 placeholder="Maximum marks"
                                                 value={inputs[subject.course_code]?.max_marks || ""}
                                                 onChange={(e) => handleInputChange(subject.course_code, "max_marks", e.target.value)}
-                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                             />
                                             <input
                                                 type="number"
@@ -522,7 +524,7 @@ function Predict({ user }) {
                                                 placeholder="Weightage"
                                                 value={inputs[subject.course_code]?.weightage || ""}
                                                 onChange={(e) => handleInputChange(subject.course_code, "weightage", e.target.value)}
-                                                className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                             />
                                             <button
                                                 onClick={() => handleAddMarks(subject)}
@@ -552,14 +554,14 @@ function Predict({ user }) {
                                     placeholder="New semester (e.g. SEM3)"
                                     value={newSemester}
                                     onChange={(e) => setNewSemester(formatSemester(e.target.value))}
-                                    className="flex-1 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                    className="flex-1 min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                 />
                                 <input
                                     type="text"
                                     placeholder="Session"
                                     value={newSession}
                                     onChange={(e) => setNewSession(e.target.value)}
-                                    className="flex-1 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                    className="flex-1 min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                 />
                             </div>
                             <button
@@ -601,7 +603,7 @@ function Predict({ user }) {
                                         const semGrades = grouped[semester];
                                         return (
                                             <div key={semester} className="mb-2 bg-[rgba(202,170,152,0.2)] rounded-xl p-4 flex flex-col gap-4">
-                                                <div className="flex items-center justify-between">
+                                                <div className="flex items-center justify-between overflow-x-auto gap-2">
                                                     <h2 className="text-lg font-bold text-[rgb(32,41,64)]">{semester}</h2>
                                                     <span className="text-sm text-gray-500">Session {semGrades[0]?.session}</span>
                                                     <button
@@ -625,8 +627,8 @@ function Predict({ user }) {
                                                         Delete Semester
                                                     </button>
                                                 </div>
-
-                                                <table className="w-full text-sm">
+                                                        <div className="overflow-x-auto">
+                                                <table className="w-full text-sm border-separate border-spacing-x-2 border-spacing-y-2">
                                                     <thead>
                                                         <tr className="text-left text-gray-500 border-b">
                                                             <th className="pb-2">Subject</th>
@@ -659,6 +661,7 @@ function Predict({ user }) {
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
 
 
 
@@ -668,14 +671,14 @@ function Predict({ user }) {
                                                         placeholder="Subject name"
                                                         value={gradeInput[semester]?.subjectName || ""}
                                                         onChange={(e) => handleGradeInput(semester, "subjectName", e.target.value)}
-                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                        className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="text"
                                                         placeholder="Course Code"
                                                         value={gradeInput[semester]?.courseCode || ""}
                                                         onChange={(e) => handleGradeInput(semester, "courseCode", e.target.value.toUpperCase().replace(/\s/g, ""))}
-                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                        className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     <input
                                                         type="number"
@@ -683,7 +686,7 @@ function Predict({ user }) {
                                                         placeholder="Credits"
                                                         value={gradeInput[semester]?.credits || ""}
                                                         onChange={(e) => handleGradeInput(semester, "credits", e.target.value)}
-                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                        className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
 
                                                     <input
@@ -692,7 +695,7 @@ function Predict({ user }) {
                                                         placeholder="Marks"
                                                         value={gradeInput[semester]?.marks || ""}
                                                         onChange={(e) => handleGradeInput(semester, "marks", e.target.value)}
-                                                        className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
+                                                        className="min-w-0 border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     />
                                                     {/* <input
                                                         type="text"
@@ -701,6 +704,7 @@ function Predict({ user }) {
                                                         onChange={(e) => handleGradeInput(semester, "grade", e.target.value)}
                                                         className="border rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(75,86,148)]"
                                                     /> */}
+                                                    <div className="flex gap-2 overflow-x-auto">
                                                     <label for="grades" className="text-gray-500 text-sm">Grade:</label>
                                                     <select name="grades" id="grades" className="text-sm"
                                                     value={gradeInput[semester]?.grade || ""}
@@ -715,6 +719,7 @@ function Predict({ user }) {
                                                         <option value="D">D</option>
                                                         <option value="F">F</option>
                                                     </select>
+                                                    </div>
 
                                                     <button
                                                         onClick={() => handleSaveGrade(semester, semGrades[0]?.session)}

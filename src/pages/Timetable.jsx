@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const TABLE = "reminders";
 
 const COLORS = {
@@ -106,6 +106,10 @@ function Timetable({ user }) {
         setShowModal(true);
     }
 
+    const handleConnect = () => {
+        window.location.href = `${BACKEND_URL}/auth/google?user_id=${user.id}`;
+    };
+
     async function saveReminder() {
         if (!draftTitle.trim()) return; // basic guard — don't save empty entries
 
@@ -137,9 +141,20 @@ function Timetable({ user }) {
         }));
 
         setShowModal(false);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            await fetch(`${BACKEND_URL}/reminders/${data.id}/sync-google`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${session.access_token}` },
+            });
+        } catch (err) {
+            console.error("Google sync failed:", err);
+        }
     }
 
     async function deleteReminder(dateKey, id) {
+        const reminder = reminders[dateKey]?.find((r) => r.id === id);
         const { error } = await supabase.from(TABLE).delete().eq("id", id);
         if (error) {
             setError(error.message);
@@ -149,6 +164,21 @@ function Timetable({ user }) {
             ...prev,
             [dateKey]: prev[dateKey].filter((r) => r.id !== id),
         }));
+        if (reminder?.google_event_id) {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            await fetch(`${BACKEND_URL}/reminders/${id}/sync-google`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ googleEventId: reminder.google_event_id }),
+            });
+        } catch (err) {
+            console.error("Google delete failed:", err);
+        }
+    }
     }
 
 
@@ -168,7 +198,15 @@ function Timetable({ user }) {
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
+            <div className="flex justify-between">
+                <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
+                <button onClick={handleConnect}
+                    className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                >
+                    Connect Google Calendar
+                </button>
+            </div>
+
             {error && (
                 <p className="text-sm text-red-600 mt-2">Error: {error}</p>
             )}
@@ -178,7 +216,7 @@ function Timetable({ user }) {
                 <div className="flex-1 p-6 rounded-lg w-full bg-[rgba(202,170,152,0.2)]">
                     {/* list */}
                     <h2 className="text-xl text-[rgb(75,64,56)] space-mono-bold">Upcoming Events</h2>
-                
+
                     <div className="px-4 w-full h-138 overflow-y-auto rounded-xl py-6 flex flex-col gap-4">
                         {loading && <p className="text-sm text-gray-400">Loading…</p>}
                         {!loading && upcoming.length === 0 && (
@@ -195,53 +233,53 @@ function Timetable({ user }) {
                                     {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
                                 </div>
                                 <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
-                                
+
                             </div>
                         ))}
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                {/* Calendar grid */}
-                <div className="flex flex-col justify-center max-w-full min-w-0">
-                    <div className="flex items-center justify-center mb-4">
+                    {/* Calendar grid */}
+                    <div className="flex flex-col justify-center max-w-full min-w-0">
+                        <div className="flex items-center justify-center mb-4">
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={goPrevMonth}
-                                className="cursor-pointer w-6 h-6 rounded-full border border-yellow-700 text-[rgb(40,20,9)] hover:bg-yellow-50 flex items-center justify-center"
-                            >
-                                ‹
-                            </button>
-                            <p className="space-mono-bold text-[rgb(40,20,9)] w-36 text-center">{monthLabel}</p>
-                            <button
-                                onClick={goNextMonth}
-                                className="cursor-pointer w-6 h-6 rounded-full border border-yellow-700 text-[rgb(40,20,9)] hover:bg-yellow-50 flex items-center justify-center"
-                            >
-                                ›
-                            </button>
-                        </div>
-                    </div>
-                    <div className="w-full max-w-2xl grid grid-cols-7 gap-2">
-                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                            <div key={d} className="text-center text-xs text-[rgb(75,64,56)]">{d}</div>
-                        ))}
-                        {monthGrid.map((date, i) => {
-                            const key = formatKey(date);
-                            const dayReminders = reminders[key] || [];
-                            const isCurrentMonth = date.getMonth() === viewMonth;
-                            const isToday = formatKey(date) === formatKey(today);
-
-                            // Dominant tint = first reminder's color for that day (if any)
-                            const dominant = dayReminders[0] ? COLORS[dayReminders[0].color] : null;
-                            const cellBg = dominant ? dominant.bg : "bg-yellow-50";
-                            const cellBorder = dominant ? dominant.border : "border-transparent";
-
-
-                            return (
+                            <div className="flex items-center gap-3">
                                 <button
-                                    key={i}
-                                    onClick={() => openDay(date)}
-                                    className={`
+                                    onClick={goPrevMonth}
+                                    className="cursor-pointer w-6 h-6 rounded-full border border-yellow-700 text-[rgb(40,20,9)] hover:bg-yellow-50 flex items-center justify-center"
+                                >
+                                    ‹
+                                </button>
+                                <p className="space-mono-bold text-[rgb(40,20,9)] w-36 text-center">{monthLabel}</p>
+                                <button
+                                    onClick={goNextMonth}
+                                    className="cursor-pointer w-6 h-6 rounded-full border border-yellow-700 text-[rgb(40,20,9)] hover:bg-yellow-50 flex items-center justify-center"
+                                >
+                                    ›
+                                </button>
+                            </div>
+                        </div>
+                        <div className="w-full max-w-2xl grid grid-cols-7 gap-2">
+                            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                                <div key={d} className="text-center text-xs text-[rgb(75,64,56)]">{d}</div>
+                            ))}
+                            {monthGrid.map((date, i) => {
+                                const key = formatKey(date);
+                                const dayReminders = reminders[key] || [];
+                                const isCurrentMonth = date.getMonth() === viewMonth;
+                                const isToday = formatKey(date) === formatKey(today);
+
+                                // Dominant tint = first reminder's color for that day (if any)
+                                const dominant = dayReminders[0] ? COLORS[dayReminders[0].color] : null;
+                                const cellBg = dominant ? dominant.bg : "bg-yellow-50";
+                                const cellBorder = dominant ? dominant.border : "border-transparent";
+
+
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => openDay(date)}
+                                        className={`
                 relative aspect-square
                 rounded-lg sm:rounded-xl
                 border text-center p-1.5 sm:p-2
@@ -252,23 +290,23 @@ function Timetable({ user }) {
 
                 hover:border-[rgb(32,41,64)]
               `}
-                                >
-                                    <span className={`text-sm sm:text-md ${isCurrentMonth ? "text-[rgb(40,20,9)]" : "text-gray-400"}`}>
-                                        {date.getDate()}
-                                    </span>
+                                    >
+                                        <span className={`text-sm sm:text-md ${isCurrentMonth ? "text-[rgb(40,20,9)]" : "text-gray-400"}`}>
+                                            {date.getDate()}
+                                        </span>
 
-                                    {/* Dots for each reminder type present that day */}
-                                    <div className="absolute bottom-1 left-1.5 sm:bottom-1.5 sm:left-2 flex gap-1">
-                                        {dayReminders.slice(0, 3).map((r) => (
-                                            <span key={r.id} className={`w-1.5 h-1.5 rounded-full ${COLORS[r.color]?.dot || "bg-gray-400"}`}></span>
-                                        ))}
-                                    </div>
-                                </button>
-                            );
-                        })}
+                                        {/* Dots for each reminder type present that day */}
+                                        <div className="absolute bottom-1 left-1.5 sm:bottom-1.5 sm:left-2 flex gap-1">
+                                            {dayReminders.slice(0, 3).map((r) => (
+                                                <span key={r.id} className={`w-1.5 h-1.5 rounded-full ${COLORS[r.color]?.dot || "bg-gray-400"}`}></span>
+                                            ))}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
                     </div>
-                    
-                </div>
                 </div>
             </div>
             {/* Day detail / add modal */}
@@ -347,7 +385,7 @@ function Timetable({ user }) {
                             <button
                                 onClick={saveReminder}
                                 className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
-                        >
+                            >
                                 Save reminder
                             </button>
                         </div>

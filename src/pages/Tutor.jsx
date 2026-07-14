@@ -257,10 +257,10 @@ function Tutor({ user }) {
                     }
                 </button>
                 {listSemesters && (
-                    <div className="flex gap-4 my-4">
+                    <div className="flex gap-4 my-4 overflow-x-auto">
                         {
                             sortedSemesters.length === 0 ? (
-                                <p className="text-gray-500">No past grades added yet</p>
+                                <p className="text-gray-500">No past subject grades added yet</p>
                             ) : (
                                 sortedSemesters.map((semester) => {
                                     return (
