@@ -10,6 +10,7 @@ const studyPlanChatRouter = require("./routes/studyPlanChat.js");
 
 const googleAuthRoutes = require("./routes/googleAuth.js");
 const googleSyncRoutes = require("./routes/googleSync.js");
+const { syncCalendarChanges } = require("./lib/googleCalendar");
 
 const modelStats = require("./model_stats.json");
 const TRAINING_MEAN = modelStats.training_mean;//63
@@ -197,7 +198,11 @@ app.post("/google/webhook", async (req, res) => {
         return;
     }
 
-    // We'll add sync logic here next
+    try {
+        await syncCalendarChanges(channelId);
+    } catch (err) {
+        console.error(err);
+    }
 });
 
 const PORT = process.env.PORT || 3001;

@@ -153,4 +153,70 @@ async function initialCalendarSync(userId) {
     return syncToken;
 }
 
-module.exports = { pushReminderToGoogle, deleteReminderFromGoogle, startCalendarWatch, initialCalendarSync };
+async function syncCalendarChanges(channelId) {
+    // Find integration
+    const { data: integration, error } = await supabase
+        .from("google_integrations")
+        .select("*")
+        .eq("channel_id", channelId)
+        .single();
+
+    if (error || !integration) {
+        console.error("Integration not found");
+        return;
+    }
+
+    const auth = getOAuthClient();
+
+    auth.setCredentials({
+        refresh_token: integration.refresh_token,
+    });
+
+    const calendar = google.calendar({
+        version: "v3",
+        auth,
+    });
+
+    let response;
+
+    try {
+        response = await calendar.events.list({
+            calendarId: "primary",
+            syncToken: integration.sync_token,
+            singleEvents: true,
+        });
+    } catch (err) {
+
+        // sync token expired
+        if (err.code === 410) {
+            console.log("Sync token expired");
+            return;
+        }
+
+        throw err;
+    }
+
+    console.log("========== CHANGES ==========");
+
+    for (const event of response.data.items) {
+
+        console.log({
+            id: event.id,
+            summary: event.summary,
+            status: event.status,
+            start: event.start,
+            end: event.end,
+            color: event.colorId,
+        });
+
+    }
+
+    await supabase
+        .from("google_integrations")
+        .update({
+            sync_token: response.data.nextSyncToken,
+        })
+        .eq("user_id", integration.user_id);
+}
+
+module.exports = { pushReminderToGoogle, deleteReminderFromGoogle, startCalendarWatch, initialCalendarSync, syncCalendarChanges };
