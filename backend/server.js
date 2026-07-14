@@ -24,8 +24,8 @@ const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
 );
-console.log("Service key exists:", !!process.env.SUPABASE_SERVICE_KEY);
-console.log("First 20 chars:", process.env.SUPABASE_SERVICE_KEY?.slice(0, 20));
+// console.log("Service key exists:", !!process.env.SUPABASE_SERVICE_KEY);
+// console.log("First 20 chars:", process.env.SUPABASE_SERVICE_KEY?.slice(0, 20));
 
 app.use("/api", documentsRouter);
 app.use("/api", tutorChatRouter);
@@ -181,6 +181,14 @@ app.post("/predict", async (req, res) => {
     } catch (mlError) {
         return res.status(500).json({ error: "ML service unavailable", overall_z });
     }
+});
+
+app.post("/google/webhook", (req, res) => {
+    console.log("===== GOOGLE WEBHOOK =====");
+    console.log("Headers:", req.headers);
+    console.log("Body:", req.body);
+
+    res.sendStatus(200);
 });
 
 const PORT = process.env.PORT || 3001;

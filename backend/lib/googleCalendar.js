@@ -45,4 +45,66 @@ async function deleteReminderFromGoogle(userId, googleEventId) {
   await calendar.events.delete({ calendarId: "primary", eventId: googleEventId });
 }
 
-module.exports = { pushReminderToGoogle, deleteReminderFromGoogle };
+const crypto = require("crypto");
+
+async function startCalendarWatch(userId) {
+  const auth = await getAuthedClientForUser(userId);
+  if (!auth) throw new Error("Google account not connected");
+
+  const calendar = google.calendar({
+    version: "v3",
+    auth,
+  });
+
+  const channelId = crypto.randomUUID();
+
+  const response = await calendar.events.watch({
+    calendarId: "primary",
+    requestBody: {
+      id: channelId,
+      type: "web_hook",
+      address: `${process.env.BACKEND_URL}/google/webhook`,
+    },
+  });
+
+  await supabase
+    .from("google_integrations")
+    .update({
+      channel_id: channelId,
+      resource_id: response.data.resourceId,
+      channel_expiration: new Date(
+        Number(response.data.expiration)
+      ).toISOString(),
+    })
+    .eq("user_id", userId);
+
+  return response.data;
+}
+
+async function initialCalendarSync(userId) {
+  const auth = await getAuthedClientForUser(userId);
+  if (!auth) throw new Error("Google account not connected");
+
+  const calendar = google.calendar({
+    version: "v3",
+    auth,
+  });
+
+  const response = await calendar.events.list({
+    calendarId: "primary",
+    singleEvents: true,
+  });
+
+  const syncToken = response.data.nextSyncToken;
+
+  await supabase
+    .from("google_integrations")
+    .update({
+      sync_token: syncToken,
+    })
+    .eq("user_id", userId);
+
+  return syncToken;
+}
+
+module.exports = { pushReminderToGoogle, deleteReminderFromGoogle, startCalendarWatch, initialCalendarSync };
