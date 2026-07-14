@@ -51,6 +51,7 @@ function Timetable({ user }) {
     const [draftColor, setDraftColor] = useState("red");
     const [draftTitle, setDraftTitle] = useState("");
     const [draftTime, setDraftTime] = useState("");
+    const [draftEndTime, setDraftEndTime] = useState("");
     const [draftNotes, setDraftNotes] = useState("");
 
     const monthGrid = useMemo(() => getMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
@@ -102,6 +103,7 @@ function Timetable({ user }) {
         setDraftColor("red");
         setDraftTitle("");
         setDraftTime("");
+        setDraftEndTime("");
         setDraftNotes("");
         setShowModal(true);
     }
@@ -114,11 +116,15 @@ function Timetable({ user }) {
         if (!draftTitle.trim()) return; // basic guard — don't save empty entries
 
         const key = formatKey(selectedDate);
+        const isAllDay = !draftTime;
         const newEntry = {
             date: key,
             color: draftColor,
             title: draftTitle.trim(),
             time: draftTime || null,
+            end_time: draftEndTime || null,
+            all_day: isAllDay,
+            source: "learntrack",
             notes: draftNotes.trim() || null,
             user_id: user.id,
         };
@@ -165,20 +171,20 @@ function Timetable({ user }) {
             [dateKey]: prev[dateKey].filter((r) => r.id !== id),
         }));
         if (reminder?.google_event_id) {
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            await fetch(`${BACKEND_URL}/reminders/${id}/sync-google`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ googleEventId: reminder.google_event_id }),
-            });
-        } catch (err) {
-            console.error("Google delete failed:", err);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                await fetch(`${BACKEND_URL}/reminders/${id}/sync-google`, {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ googleEventId: reminder.google_event_id }),
+                });
+            } catch (err) {
+                console.error("Google delete failed:", err);
+            }
         }
-    }
     }
 
 
@@ -198,7 +204,7 @@ function Timetable({ user }) {
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex justify-between">
+            <div className="flex justify-between flex-col md:flex-row gap-2">
                 <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
                 <button onClick={handleConnect}
                     className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
@@ -345,8 +351,7 @@ function Timetable({ user }) {
 
                         {/* Add new reminder form */}
                         <div className="flex flex-col gap-3">
-                            <div className="flex gap-2">
-                            </div>
+
                             <div className="flex w-full gap-4 items-center">
                                 {COLOR_ORDER.map((color) => (
                                     <button
@@ -366,13 +371,26 @@ function Timetable({ user }) {
                                 onChange={(e) => setDraftTitle(e.target.value)}
                                 className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-yellow-700"
                             />
-
-                            <input
-                                type="time"
-                                value={draftTime}
-                                onChange={(e) => setDraftTime(e.target.value)}
-                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-yellow-700"
-                            />
+                            <div className="flex flex-col md:flex-row justify-between">
+                                <div className="flex gap-3 items-center">
+                                    <p className="text-sm">Start Time:</p>
+                                    <input
+                                        type="time"
+                                        value={draftTime}
+                                        onChange={(e) => setDraftTime(e.target.value)}
+                                        className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-yellow-700"
+                                    />
+                                </div>
+                                <div className="flex gap-3 items-center">
+                                    <p className="text-sm">End Time:</p>
+                                    <input
+                                        type="time"
+                                        value={draftEndTime}
+                                        onChange={(e) => setDraftEndTime(e.target.value)}
+                                        className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-yellow-700"
+                                    />
+                                </div>
+                            </div>
 
                             <textarea
                                 placeholder="Notes (optional)"

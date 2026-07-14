@@ -183,12 +183,21 @@ app.post("/predict", async (req, res) => {
     }
 });
 
-app.post("/google/webhook", (req, res) => {
-    console.log("===== GOOGLE WEBHOOK =====");
-    console.log("Headers:", req.headers);
-    console.log("Body:", req.body);
+app.post("/google/webhook", async (req, res) => {
+    res.sendStatus(200);   // Respond immediately
 
-    res.sendStatus(200);
+    console.log("===== GOOGLE WEBHOOK =====");
+
+    const channelId = req.headers["x-goog-channel-id"];
+    const resourceState = req.headers["x-goog-resource-state"];
+
+    console.log(channelId, resourceState);
+
+    if (resourceState === "sync") {
+        return;
+    }
+
+    // We'll add sync logic here next
 });
 
 const PORT = process.env.PORT || 3001;
