@@ -34,10 +34,10 @@ router.get("/auth/google/callback", async (req, res) => {
     }
 
     // Redirect back to your frontend
-    res.redirect(`${process.env.FRONTEND_URL}/tutor?google=connected`);
+    res.redirect(`${process.env.FRONTEND_URL}/timetable?google=connected`);
   } catch (err) {
     console.error("Google OAuth error:", err);
-    res.redirect(`${process.env.FRONTEND_URL}/tutor?google=error`);
+    res.redirect(`${process.env.FRONTEND_URL}/timetable?google=error`);
   }
 });
 
