@@ -248,10 +248,12 @@ async function syncCalendarChanges(channelId) {
             const start = new Date(event.start.dateTime);
             const end = new Date(event.end.dateTime);
 
-            date = start.toISOString().split("T")[0];
+            const startStr = event.start.dateTime;
+            const endStr = event.end.dateTime;
 
-            time = start.toTimeString().slice(0, 5);
-            endTime = end.toTimeString().slice(0, 5);
+            date = startStr.substring(0, 10);
+            time = startStr.substring(11, 16);
+            endTime = endStr.substring(11, 16);
         }
 
         const reminder = {
