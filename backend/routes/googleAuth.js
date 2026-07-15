@@ -46,4 +46,81 @@ router.get("/auth/google/callback", async (req, res) => {
     }
 });
 
+// Check connection status
+router.get("/auth/google/status", async (req, res) => {
+    const { user_id } = req.query;
+
+    if (!user_id) {
+        return res.status(400).json({ error: "user_id is required" });
+    }
+
+    const { data, error } = await supabase
+        .from("google_integrations")
+        .select("user_id, channel_expiration")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Status check failed:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({
+        connected: !!data,
+        channelExpiration: data?.channel_expiration || null,
+    });
+});
+
+// Disconnect
+router.post("/auth/google/disconnect", async (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        return res.status(400).json({ error: "user_id is required" });
+    }
+
+    const { data: integration, error: fetchError } = await supabase
+        .from("google_integrations")
+        .select("*")
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+    if (fetchError) {
+        console.error("Failed to fetch integration:", fetchError);
+        return res.status(500).json({ error: fetchError.message });
+    }
+
+    if (integration) {
+        // Best effort: stop the push channel so Google stops sending webhooks
+        try {
+            const oauth2Client = getOAuthClient();
+            oauth2Client.setCredentials({ refresh_token: integration.refresh_token });
+            const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+            if (integration.channel_id && integration.resource_id) {
+                await calendar.channels.stop({
+                    requestBody: {
+                        id: integration.channel_id,
+                        resourceId: integration.resource_id,
+                    },
+                });
+            }
+        } catch (err) {
+            console.error("Failed to stop channel (may already be expired):", err.message);
+        }
+
+        const { error: deleteError } = await supabase
+            .from("google_integrations")
+            .delete()
+            .eq("user_id", user_id);
+
+        if (deleteError) {
+            console.error("Failed to delete integration:", deleteError);
+            return res.status(500).json({ error: deleteError.message });
+        }
+    }
+
+    res.json({ disconnected: true });
+});
+
 module.exports = router;

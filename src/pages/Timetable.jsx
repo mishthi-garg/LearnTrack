@@ -46,7 +46,8 @@ function Timetable({ user }) {
     const [error, setError] = useState(null);
 
     const [reminders, setReminders] = useState({});
-
+    const [googleConnected, setGoogleConnected] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(true);
     // Draft form state for the modal
     const [draftColor, setDraftColor] = useState("red");
     const [draftTitle, setDraftTitle] = useState("");
@@ -108,9 +109,35 @@ function Timetable({ user }) {
         setShowModal(true);
     }
 
+    useEffect(() => {
+        async function checkGoogleStatus() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/auth/google/status?user_id=${user.id}`);
+                const data = await res.json();
+                setGoogleConnected(data.connected);
+            } catch (err) {
+                console.error("Failed to check Google status:", err);
+            } finally {
+                setGoogleLoading(false);
+            }
+        }
+        checkGoogleStatus();
+    }, [user]);
     const handleConnect = () => {
         window.location.href = `${BACKEND_URL}/auth/google?user_id=${user.id}`;
     };
+    async function handleDisconnect() {
+        const { data: { session } } = await supabase.auth.getSession();
+        await fetch(`${BACKEND_URL}/auth/google/disconnect`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ user_id: user.id }),
+        });
+        setGoogleConnected(false);
+    }
 
     async function saveReminder() {
         if (!draftTitle.trim()) return; // basic guard — don't save empty entries
@@ -208,11 +235,29 @@ function Timetable({ user }) {
         <div className="flex flex-col gap-6">
             <div className="flex justify-between flex-col md:flex-row gap-2">
                 <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
-                <button onClick={handleConnect}
-                    className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
-                >
-                    Connect Google Calendar
-                </button>
+                {
+                    googleLoading ? null : googleConnected ? (
+                        <div>
+                            <button onClick={handleConnect}
+                                className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                            >
+                                Switch Google Account
+                            </button>
+                            <button onClick={handleDisconnect}
+                                className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                            >
+                                Disconnect Google Account
+                            </button>
+                        </div>
+                    ) : (
+                        <button onClick={handleConnect}
+                            className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                        >
+                            Connect Google Calendar
+                        </button>
+                    )
+                }
+
             </div>
 
             {error && (
