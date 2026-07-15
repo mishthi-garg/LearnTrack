@@ -68,7 +68,8 @@ async function pushReminderToGoogle(userId, reminder) {
         };
     } else {
         // Default duration = 1 hour
-        let endTime = reminder.end_time;
+        const time = reminder.time?.slice(0, 5);
+        let endTime = reminder.end_time.slice(0, 5);
 
         if (!endTime) {
             const end = new Date(`${reminder.date}T${reminder.time}`);
@@ -90,6 +91,8 @@ async function pushReminderToGoogle(userId, reminder) {
         calendarId: "primary",
         resource: event,
     });
+
+    console.log("Event pushed to google: ", event);
 
     return res.data.id; // save this as reminder.google_event_id
 }

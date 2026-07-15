@@ -129,6 +129,8 @@ function Timetable({ user }) {
             user_id: user.id,
         };
 
+        console.log("start time inserted: ", draftTime);
+
         const { data, error } = await supabase
             .from(TABLE)
             .insert(newEntry)
@@ -236,7 +238,7 @@ function Timetable({ user }) {
                                     <p className="text-sm text-gray-500">
                                         {new Date(r.date + "T00:00:00").toLocaleDateString("default", { weekday: "short", month: "short", day: "numeric" })}
                                     </p>
-                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
+                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)}</div>}
                                 </div>
                                 <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
 
@@ -335,7 +337,7 @@ function Timetable({ user }) {
                                     <div key={r.id} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${COLORS[r.color]?.bg} ${COLORS[r.color]?.border}`}>
                                         <div>
                                             <p className={`text-sm font-medium ${COLORS[r.color]?.text}`}>{r.title}</p>
-                                            {r.time && <p className="text-xs text-gray-500">{r.time}</p>}
+                                            {r.time && <p className="text-xs text-gray-500">{r.time.slice(0, 5)}</p>}
                                         </div>
                                         <button
                                             onClick={() => deleteReminder(selectedKey, r.id)}

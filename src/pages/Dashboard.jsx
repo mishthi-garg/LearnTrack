@@ -309,7 +309,7 @@ function Dashboard({ user }) {
                                     <p className="text-sm text-gray-500">
                                         {new Date(r.date + "T00:00:00").toLocaleDateString("default", { weekday: "short", month: "short", day: "numeric" })}
                                     </p>
-                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time}</div>}
+                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)}</div>}
                                 </div>
                                 <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
                                 
