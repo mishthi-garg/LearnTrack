@@ -393,7 +393,7 @@ function Predict({ user }) {
     return (
         <div>
             <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Predict</h1>
-            <div className="englebert-regular text-lg bg-yellow-50 border border-yellow-300 my-4 p-4 rounded-lg text-yellow-800">
+            <div className="text-md bg-yellow-50 border border-yellow-300 my-4 p-4 rounded-lg text-yellow-800">
                 Since the grades are relative, predictions will be based using a placeholder mean and standard deviation until 30+ students join the platform and provide marks for the same course.
             </div>
             <div className="flex gap-4 mt-4">

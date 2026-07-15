@@ -314,7 +314,7 @@ function Profile({ user }) {
                     onClick={() => setShowSemesterModal(true)}
                     className="sniglet-regular cursor-pointer disabled:opacity-50 bg-[rgb(75,86,148)] text-white font-bold py-2 px-4 rounded-lg hover:bg-[rgb(32,41,64)]"
                 >
-                    Udgrade Semester
+                    Upgrade Semester
                 </button>
                 <button onClick={() => { handleLogout(); }} disabled={logoutLoading}
                     className="sniglet-regular disabled:opacity-50 cursor-pointer bg-yellow-50 text-yellow-800 font-bold px-4 py-2 rounded-lg hover:bg-[rgb(75,64,56,0.2)]">

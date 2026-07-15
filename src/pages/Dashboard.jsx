@@ -204,7 +204,7 @@ function Dashboard({ user }) {
             {
                 !profileComplete && (
                     <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex gap-3 items-center justify-between">
-                        <p className="englebert-regular text-yellow-800 text-lg">Seems like your profile is incomplete! Please complete your profile to get the most out of LearnTrack.</p>
+                        <p className="text-yellow-800 text-md">Seems like your profile is incomplete! Please complete your profile to get the most out of LearnTrack.</p>
                         <NavLink to="/profile" className="exo text-sm font-bold text-[rgb(75,86,148)] hover:underline">
                             Click to Complete Profile
                         </NavLink>
