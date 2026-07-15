@@ -236,8 +236,10 @@ function Timetable({ user }) {
             <div className="flex justify-between flex-col md:flex-row gap-2">
                 <h1 className="cause text-3xl font-bold text-[rgb(32,41,64)]">Timetable</h1>
                 {
-                    googleLoading ? null : googleConnected ? (
-                        <div>
+                    googleLoading ? (
+                        <p className="text-md text-gray-500 p-4">Loading…</p>
+                    ) : googleConnected ? (
+                        <div className="flex flex-col md:flex-row gap-2">
                             <button onClick={handleConnect}
                                 className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                             >
