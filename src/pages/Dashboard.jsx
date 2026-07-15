@@ -253,7 +253,7 @@ function Dashboard({ user }) {
 
                                     <button
                                         onClick={() => deleteTask(task.id)}
-                                        className="exo min-w-0 text-red-500 hover:text-red-700"
+                                        className="exo cursor-pointer min-w-0 text-red-500 hover:text-red-700"
                                     >
                                         Delete
                                     </button>
