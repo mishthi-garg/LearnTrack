@@ -69,16 +69,16 @@ async function pushReminderToGoogle(userId, reminder) {
     } else {
         // Default duration = 1 hour
         const time = reminder.time?.slice(0, 5);
-        let endTime = reminder.end_time.slice(0, 5);
+        let endTime = reminder.end_time?.slice(0, 5);
 
         if (!endTime) {
-            const end = new Date(`${reminder.date}T${reminder.time}`);
+            const end = new Date(`${reminder.date}T${time}`);
             end.setHours(end.getHours() + 1);
             endTime = end.toTimeString().slice(0, 5);
         }
 
         event.start = {
-            dateTime: `${reminder.date}T${reminder.time}:00`,
+            dateTime: `${reminder.date}T${time}:00`,
             timeZone: "Asia/Kolkata",
         };
 
