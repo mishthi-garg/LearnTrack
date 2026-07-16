@@ -289,7 +289,7 @@ function Tutor({ user }) {
                     </div>
                 )}
                 {listSemesters && selectedSemester && (
-                    <div className="flex gap-4 my-4 flex-wrap">
+                    <div className="flex gap-4 my-4 overflow-x-auto">
                         {grouped[selectedSemester].map((subject) => (
                             <button
                                 key={subject.id}

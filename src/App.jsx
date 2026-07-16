@@ -144,7 +144,7 @@ function App() {
                         <Lanyard
                           position={[0, 0, 20]}
                           gravity={[0, -40, 0]}
-                          headText = "LearnTrack"
+                          headText="LearnTrack"
                           nameText={`${profileName || ""}`}
                           mailText={`${user.email}`}
                         />
@@ -163,62 +163,67 @@ function App() {
 
               {
                 menuOpen && (
-                  <div className="md:hidden flex rounded-lg px-4 py-4 shadow-lg flex-col gap-2 bg-[rgb(238,238,238)] absolute right-6 top-14 z-20">
-                    <div className="cause border-b-1 border-gray-400 pb-2 mb-2">
-                      <p className="text-sm font-bold">{profileName || ""}</p>
-                      <p className="text-sm">{user.email}</p>
+                  <div
+                    className="fixed inset-0"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <div className="md:hidden flex rounded-lg px-4 py-4 shadow-lg flex-col gap-2 bg-[rgb(238,238,238)] absolute right-6 top-14 z-20">
+                      <div className="cause border-b-1 border-gray-400 pb-2 mb-2">
+                        <p className="text-sm font-bold">{profileName || ""}</p>
+                        <p className="text-sm">{user.email}</p>
+                      </div>
+                      <NavLink
+                        to="/"
+                        onClick={() => setMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                          }`}
+                      >
+                        Dashboard
+                      </NavLink>
+
+                      <NavLink
+                        to="/timetable"
+                        onClick={() => setMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                          }`}
+                      >
+                        Timetable
+                      </NavLink>
+
+                      <NavLink
+                        to="/tutor"
+                        onClick={() => setMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                          }`}
+                      >
+                        Tutor
+                      </NavLink>
+
+                      <NavLink
+                        to="/predict"
+                        onClick={() => setMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                          }`}
+                      >
+                        Predict
+                      </NavLink>
+                      <NavLink
+                        to="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
+                          }`}
+                      >
+                        Profile
+                      </NavLink>
+                      <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={logoutLoading} className="sniglet-regular disabled:opacity-50 cursor-pointer text-sm bg-[rgb(75,86,148)] text-white font-bold px-3 py-2 rounded-lg hover:bg-[rgb(32,41,64)] mt-1">
+                        {logoutLoading ? "Logging Out..." : "Logout"}
+                      </button>
                     </div>
-                    <NavLink
-                      to="/"
-                      onClick={() => setMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }`}
-                    >
-                      Dashboard
-                    </NavLink>
-
-                    <NavLink
-                      to="/timetable"
-                      onClick={() => setMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }`}
-                    >
-                      Timetable
-                    </NavLink>
-
-                    <NavLink
-                      to="/tutor"
-                      onClick={() => setMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }`}
-                    >
-                      Tutor
-                    </NavLink>
-
-                    <NavLink
-                      to="/predict"
-                      onClick={() => setMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }`}
-                    >
-                      Predict
-                    </NavLink>
-                    <NavLink
-                      to="/profile"
-                      onClick={() => setMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `exo-2 ${isActive ? "font-semibold text-[rgb(32,41,64)]" : "text-[rgb(32,41,64)] hover:underline"
-                      }`}
-                    >
-                      Profile
-                    </NavLink>
-                    <button onClick={() => { handleLogout(); setMenuOpen(false); }} disabled={logoutLoading} className="sniglet-regular disabled:opacity-50 cursor-pointer text-sm bg-[rgb(75,86,148)] text-white font-bold px-3 py-2 rounded-lg hover:bg-[rgb(32,41,64)] mt-1">
-                      {logoutLoading ? "Logging Out..." : "Logout"}
-                    </button>
                   </div>
                 )
               }

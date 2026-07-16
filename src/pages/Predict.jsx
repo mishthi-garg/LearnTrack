@@ -442,14 +442,14 @@ function Predict({ user }) {
                                             </button>
 
                                             {predictions[subject.course_code] && (
-                                                <div className="fraunces bg-yellow-50 rounded-full px-4 flex items-center gap-3">
-                                                    <span className="font-bold text-lg text-[rgb(32,41,64)]">
+                                                <div className="fraunces bg-[rgb(32,41,64)] rounded-full px-5 py-1 flex items-center gap-3">
+                                                    <span className="font-bold text-xl text-white">
                                                         {predictions[subject.course_code].predicted_grade}
                                                     </span>
-                                                    <span className="text-sm text-gray-500">
+                                                    <span className="text-md text-white">
                                                         {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
                                                     </span>
-                                                    <span className="text-xs text-gray-400">
+                                                    <span className="text-sm text-white">
                                                         z-score [ {predictions[subject.course_code].overall_z} ]
                                                     </span>
                                                 </div>
