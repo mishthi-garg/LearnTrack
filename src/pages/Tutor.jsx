@@ -74,7 +74,6 @@ function Tutor({ user }) {
             const { data, error } = await supabase
                 .from("documents")
                 .select("*")
-                .eq("user_id", user.id)
                 .eq("course_code", courseCode)
                 .order("uploaded_at", { ascending: false });
             if (error) console.error("Error fetching documents:", error);
@@ -227,7 +226,7 @@ function Tutor({ user }) {
 
                 <div className="py-2 flex gap-3 items-center justify-between">
                     <h2 className="text-xl space-mono-bold text-[rgb(75,64,56)]">Reference Notes</h2>
-
+        
                     <button
                         onClick={handleAddClick}
                         disabled={uploading || !selectedSubject}
@@ -243,7 +242,7 @@ function Tutor({ user }) {
                         onChange={handleFileChange}
                     />
                 </div>
-                <p className="text-sm">Select a subject to upload documents.</p>
+                <p className="text-sm">Select a subject to share notes.</p>
                 <button
                     onClick={() => {
                         setListSemesters(!listSemesters);
@@ -314,7 +313,7 @@ function Tutor({ user }) {
                     </div>
                 )}
                 {subjects.length === 0 ? (
-                    <p className="text-gray-500 mt-2">No subjects found. Please add subjects in your Profile.</p>
+                    <p className="text-gray-500 my-4 text-sm">No subjects found. Please add subjects in your Profile.</p>
                 ) : (!listSemesters && (
                     <div className="flex gap-4 my-4 overflow-x-auto">
                         {subjects.map((subject) => {

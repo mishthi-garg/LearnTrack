@@ -446,10 +446,10 @@ function Predict({ user }) {
                                                     <span className="font-bold text-xl text-white">
                                                         {predictions[subject.course_code].predicted_grade}
                                                     </span>
-                                                    <span className="text-md text-white">
+                                                    <span className="text-md font-medium text-white">
                                                         {Math.round((predictions[subject.course_code].confidence?.[predictions[subject.course_code].predicted_grade] || 0) * 100)}% confidence
                                                     </span>
-                                                    <span className="text-sm text-white">
+                                                    <span className="text-sm font-medium text-white">
                                                         z-score [ {predictions[subject.course_code].overall_z} ]
                                                     </span>
                                                 </div>
