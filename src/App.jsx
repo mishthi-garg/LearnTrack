@@ -164,10 +164,10 @@ function App() {
               {
                 menuOpen && (
                   <div
-                    className="fixed inset-0"
+                    className="fixed inset-0 z-20"
                     onClick={() => setMenuOpen(false)}
                   >
-                    <div className="md:hidden flex rounded-lg px-4 py-4 shadow-lg flex-col gap-2 bg-[rgb(238,238,238)] absolute right-6 top-14 z-20">
+                    <div className="md:hidden flex rounded-lg px-4 py-4 shadow-lg flex-col gap-2 bg-[rgb(238,238,238)] absolute right-6 top-14 z-30">
                       <div className="cause border-b-1 border-gray-400 pb-2 mb-2">
                         <p className="text-sm font-bold">{profileName || ""}</p>
                         <p className="text-sm">{user.email}</p>

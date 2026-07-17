@@ -1,12 +1,13 @@
 {
-  "training_mean": 0.630572,
-  "training_std": 0.114582,
+  "training_mean": 0.463819,
+  "training_std": 0.140889,
    "grade_boundaries": {
-        "F_to_D": -1.91,
-        "D_to_CD": -1.24,
-        "CD_to_C": -0.49,
-        "C_to_BC": 0.11,
-        "BC_to_AB": 1.23,
-        "AB_to_A": 1.58
+        "F_to_D": -1.72,
+        "D_to_CD": -1.02,
+        "CD_to_C": -0.55,
+        "C_to_BC": -0.23,
+        "BC_to_B": 0.42,
+        "B_to_AB": 0.9,
+        "AB_to_A": 1.54
     }
 }

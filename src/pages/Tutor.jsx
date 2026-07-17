@@ -169,6 +169,10 @@ function Tutor({ user }) {
     };
 
     const handleDelete = async (doc) => {
+        if (doc.user_id !== user.id) {
+            alert("You can only delete your own documents.");
+            return;
+        }
         if (!confirm(`Delete "${doc.file_name}"?`)) return;
         try {
             const path = doc.file_path;
@@ -226,7 +230,7 @@ function Tutor({ user }) {
 
                 <div className="py-2 flex gap-3 items-center justify-between">
                     <h2 className="text-xl space-mono-bold text-[rgb(75,64,56)]">Reference Notes</h2>
-        
+
                     <button
                         onClick={handleAddClick}
                         disabled={uploading || !selectedSubject}
@@ -360,7 +364,8 @@ function Tutor({ user }) {
                                 </a>
                                 <button
                                     onClick={() => handleDelete(doc)}
-                                    className="text-red-500 hover:text-red-700 ml-3"
+                                    disabled={doc.user_id !== user.id}
+                                    className="disabled:opacity-50 disabled:cursor-not-allowed exo cursor-pointer text-red-500 hover:text-red-700 ml-3"
                                 >
                                     Delete
                                 </button>
