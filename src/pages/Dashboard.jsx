@@ -204,7 +204,7 @@ function Dashboard({ user }) {
             {
                 !profileComplete && (
                     <div className="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 flex gap-3 items-center justify-between">
-                        <p className="text-yellow-800 text-md">Seems like your profile is incomplete! Please complete your profile to get the most out of LearnTrack.</p>
+                        <p className="text-yellow-800 text-md">Seems like your profile is <span className="font-bold">incomplete!</span> Please complete your profile to get the most out of LearnTrack.</p>
                         <NavLink to="/profile" className="exo text-sm font-bold text-[rgb(75,86,148)] hover:underline">
                             Click to Complete Profile
                         </NavLink>
@@ -309,7 +309,7 @@ function Dashboard({ user }) {
                                     <p className="text-sm text-gray-500">
                                         {new Date(r.date + "T00:00:00").toLocaleDateString("default", { weekday: "short", month: "short", day: "numeric" })}
                                     </p>
-                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)}</div>}
+                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)} - {r.end_time.slice(0, 5)}</div>}
                                 </div>
                                 <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
                                 

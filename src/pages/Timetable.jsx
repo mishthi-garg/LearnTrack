@@ -54,6 +54,7 @@ function Timetable({ user }) {
     const [draftTime, setDraftTime] = useState("");
     const [draftEndTime, setDraftEndTime] = useState("");
     const [draftNotes, setDraftNotes] = useState("");
+    const [savingLoad, setSavingLoad] = useState(false);
 
     const monthGrid = useMemo(() => getMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
     const monthLabel = new Date(viewYear, viewMonth).toLocaleString("default", { month: "long", year: "numeric" });
@@ -141,7 +142,7 @@ function Timetable({ user }) {
 
     async function saveReminder() {
         if (!draftTitle.trim()) return; // basic guard — don't save empty entries
-
+        setSavingLoad(true);
         const key = formatKey(selectedDate);
         const isAllDay = !draftTime;
         const newEntry = {
@@ -174,7 +175,7 @@ function Timetable({ user }) {
             ...prev,
             [key]: [...(prev[key] || []), data],
         }));
-
+        setSavingLoad(false);
         setShowModal(false);
 
         try {
@@ -285,7 +286,7 @@ function Timetable({ user }) {
                                     <p className="text-sm text-gray-500">
                                         {new Date(r.date + "T00:00:00").toLocaleDateString("default", { weekday: "short", month: "short", day: "numeric" })}
                                     </p>
-                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)}</div>}
+                                    {r.time && <div className={`${COLORS[r.color]?.bg} w-fit px-2 py-0.5 rounded-full text-xs ml-2`}>{r.time.slice(0, 5)} - {r.end_time.slice(0, 5)}</div>}
                                 </div>
                                 <p className="mt-2 text-[rgb(40,20,9)]">{r.title}</p>
 
@@ -384,11 +385,11 @@ function Timetable({ user }) {
                                     <div key={r.id} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${COLORS[r.color]?.bg} ${COLORS[r.color]?.border}`}>
                                         <div>
                                             <p className={`text-sm font-medium ${COLORS[r.color]?.text}`}>{r.title}</p>
-                                            {r.time && <p className="text-xs text-gray-500">{r.time.slice(0, 5)}</p>}
+                                            {r.time && <p className="text-xs text-gray-500">{r.time.slice(0, 5)} - {r.end_time.slice(0, 5)}</p>}
                                         </div>
                                         <button
                                             onClick={() => deleteReminder(selectedKey, r.id)}
-                                            className="exo cursor-pointer text-gray-400 hover:text-[rgb(193,102,107)] text-sm"
+                                            className="exo cursor-pointer text-gray-500 hover:text-[rgb(193,102,107)] text-sm"
                                         >
                                             Remove
                                         </button>
@@ -422,7 +423,10 @@ function Timetable({ user }) {
                             />
                             <div className="flex flex-col md:flex-row justify-between">
                                 <div className="flex gap-3 items-center">
-                                    <p className="text-sm">Start Time:</p>
+                                    <p className={`text-sm
+                                        ${
+                                                draftTime ? "text-black" : "text-red-600"
+                                            }`}>Start Time:</p>
                                     <input
                                         type="time"
                                         value={draftTime}
@@ -431,7 +435,10 @@ function Timetable({ user }) {
                                     />
                                 </div>
                                 <div className="flex gap-3 items-center">
-                                    <p className="text-sm">End Time:</p>
+                                    <p className={`text-sm
+                                        ${
+                                                draftEndTime ? "text-black" : "text-red-600"
+                                            }`}>End Time:</p>
                                     <input
                                         type="time"
                                         value={draftEndTime}
@@ -451,9 +458,10 @@ function Timetable({ user }) {
 
                             <button
                                 onClick={saveReminder}
-                                className="cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
+                                disabled={savingLoad}
+                                className="disabled:opacity-50 cursor-pointer min-w-0 bg-[rgb(75,86,148)] text-white font-bold sniglet-regular px-4 py-2 rounded-lg hover:bg-[rgb(32,41,64)]"
                             >
-                                Save reminder
+                                {savingLoad ? "Saving..." : "Save reminder"}
                             </button>
                         </div>
                     </div>
